@@ -1,8 +1,11 @@
+run:
+	uv run -m bot
+
 lint:
-	mypy src/
-	ruff check src/
-	ruff format src/ --check
+	uv run mypy src/
+	uv run ruff check src/
+	uv run ruff format src/ --check
 
 format:
-	ruff check --select I --fix src/
-	ruff format src/
+	uv run ruff check --select I --fix src/
+	uv run ruff format src/
