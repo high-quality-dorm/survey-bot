@@ -1,7 +1,10 @@
 import logging
 from asyncio import CancelledError
+from pathlib import Path
 
 from aiogram import Bot, Dispatcher
+from aiogram_i18n import I18nMiddleware
+from aiogram_i18n.cores import FluentCompileCore
 
 from bot.core import settings
 from bot.handlers import main_router
@@ -14,6 +17,14 @@ logging.basicConfig(
 
 bot = Bot(token=settings.token)
 dp = Dispatcher(drop_pending_updates=True)
+
+
+LOCALES = Path(__file__).resolve().parent / "locales"
+i18n_middleware = I18nMiddleware(
+    core=FluentCompileCore(path=LOCALES),
+    default_locale="ru",
+)
+i18n_middleware.setup(dp)
 
 dp.include_router(main_router)
 
