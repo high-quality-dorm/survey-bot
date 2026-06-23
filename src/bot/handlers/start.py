@@ -6,5 +6,5 @@ router = Router()
 
 
 @router.message(CommandStart())
-async def cmd_start(message: Message, command: CommandObject) -> None:
-    message.answer(f"Привет! Аргументы: {command.args}")
+async def handle_cmd_start(message: Message, command: CommandObject) -> None:
+    await message.answer(f"Привет! Аргументы: {command.args}")
