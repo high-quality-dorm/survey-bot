@@ -4,7 +4,13 @@ from pathlib import Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .db.database import get_session
-from .db.queries import create_survey, create_question, create_answer, get_question
+from .db.queries import (
+    create_survey,
+    create_question,
+    create_answer,
+    get_question,
+    create_user,
+)
 from survio.schemas import json_schemas, schemas
 
 
@@ -59,6 +65,10 @@ class SurveyRepository:
         question = await get_question(self.session, question_id=question_id)
         return schemas.Question.model_validate(question)
 
+    async def create_user(sefl, tg_id: int, name: str) -> schemas.User:
+        user = await create_user(sefl.session, tg_id=tg_id, name=name)
+        return schemas.User.model_validate(user)
+
 
 if __name__ == "__main__":
     import asyncio
@@ -69,7 +79,7 @@ if __name__ == "__main__":
 
         async for session in get_session():
             survey_repo = SurveyRepository(session)
-            print(await survey_repo.get_question_with_answers(2))
+            print(await survey_repo.create_user(2, "popka"))
             break
 
     asyncio.run(main())
