@@ -23,6 +23,7 @@ class Question(BaseModel):
 
     model_config = {"from_attributes": True}
 
+
 class User(BaseModel):
     id: int
     tg_id: int
@@ -42,6 +43,5 @@ class Pass(BaseModel):
 
 class UserPass(User):
     passes: Pass
-    
-    model_config = {"from_attributes": True}
 
+    model_config = {"from_attributes": True}

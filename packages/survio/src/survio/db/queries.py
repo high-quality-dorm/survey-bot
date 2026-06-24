@@ -53,8 +53,9 @@ async def get_question(
     result = await session.execute(query)
     return result.unique().scalars().one_or_none()
 
-async def create_user(session: AsyncSession, tg_id: int, name: str) ->models.Users:
-    user = models.Users(tg_id = tg_id, name = name)
+
+async def create_user(session: AsyncSession, tg_id: int, name: str) -> models.Users:
+    user = models.Users(tg_id=tg_id, name=name)
     session.add(user)
     await session.flush()
     return user
