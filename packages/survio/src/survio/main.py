@@ -10,6 +10,7 @@ from .db.queries import (
     create_answer,
     get_question,
     create_user,
+    create_pass,
 )
 from survio.schemas import json_schemas, schemas
 
@@ -65,9 +66,14 @@ class SurveyRepository:
         question = await get_question(self.session, question_id=question_id)
         return schemas.Question.model_validate(question)
 
-    async def create_user(sefl, tg_id: int, name: str) -> schemas.User:
-        user = await create_user(sefl.session, tg_id=tg_id, name=name)
+    async def create_user(self, tg_id: int, name: str) -> schemas.User:
+        user = await create_user(self.session, tg_id=tg_id, name=name)
+        await self.session.commit()
         return schemas.User.model_validate(user)
+
+    async def answer_question(self, answer_id: int, user_id: int) -> schemas.Pass:
+        res = await create_pass(self.session, answer_id, user_id)
+        return schemas.Pass.model_validate(res)
 
 
 if __name__ == "__main__":
@@ -79,7 +85,7 @@ if __name__ == "__main__":
 
         async for session in get_session():
             survey_repo = SurveyRepository(session)
-            print(await survey_repo.create_user(2, "popka"))
+            print(await survey_repo.answer_question(1, 1))
             break
 
     asyncio.run(main())
