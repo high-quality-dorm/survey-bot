@@ -3,27 +3,36 @@ import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from survio.db import models
-from survio.schemas import schemas
 
 
-async def create_survey(session: AsyncSession, survey_json: schemas.SurveyJSON):
+async def create_survey(
+    session: AsyncSession, title: str, description: str | None
+) -> models.Surveys:
     survey = models.Surveys(
-        uuid=str(uuid.uuid4()), title=survey_json.title, description=survey_json.description
+        uuid=str(uuid.uuid4()), title=title, description=description
     )
     session.add(survey)
     await session.flush()
-    questions = dict()
-    for q in survey_json.questions:
-        question = models.Questions(question=q.question, survey_id=survey.id)
-        questions[q.name] = (question, q.answers)
-    session.add_all([q[0] for q in questions.values()])
+    return survey
+
+
+async def create_question(
+    session: AsyncSession, question: str, survey_id
+) -> models.Questions:
+    qstn = models.Questions(question=question, survey_id=survey_id)
+    session.add(qstn)
     await session.flush()
-    for q in questions.values():
-        for ans in q[1]:
-            answer = models.Answers(
-                question_id=q[0].id,
-                next_question_id=questions.get(ans.next_question)[0].id,
-                answer=ans.answer,
-            )
-            session.add(answer)
-    await session.commit()
+    return qstn
+
+
+async def create_answer(
+    session: AsyncSession, qstn_id: int, nxt_qstn_id: int | None, answer: str | None
+) -> models.Answers:
+    ans = models.Answers(
+        question_id=qstn_id,
+        next_question_id=nxt_qstn_id,
+        answer=answer,
+    )
+    session.add(ans)
+    await session.flush()
+    return ans
