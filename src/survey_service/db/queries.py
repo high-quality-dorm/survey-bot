@@ -1,0 +1,22 @@
+from survey_service.db import models
+from survey_service.schemas import schemas
+from sqlalchemy.ext.asyncio import AsyncSession
+import uuid
+
+async def create_survey(session: AsyncSession, survey_json: schemas.SurveyJSON):
+    survey = models.Surveys(uuid = uuid.uuid4, title = survey_json.title, description = survey_json.description)
+    session.add(survey)
+    session.flush()
+    questions = dict()
+    for q in survey_json.questions:
+        question = models.Questions(question=q.question, survey_id = survey.id)
+        questions[q.name]=(question, q.answers)
+    session.add_all([q[0] for q in questions.values()])
+    session.flush()
+    for q in questions.values():
+        for ans in q[1]:
+            answer = models.Answers(question_id=q[0].id, next_question_id = questions.get(ans.next_question)[0].id, answer = ans.answer)
+            session.add(answer)
+    session.commit()
+
+        
