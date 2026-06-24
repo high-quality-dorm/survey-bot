@@ -4,8 +4,8 @@ from pathlib import Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .db.database import get_session
-from .db.queries import create_survey, create_question, create_answer
-from survio.schemas import json_schemas
+from .db.queries import create_survey, create_question, create_answer, get_question
+from survio.schemas import json_schemas, schemas
 
 
 class JSONParser:
@@ -51,19 +51,25 @@ class JSONParser:
         return survey.uuid
 
 
+class SurveyRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def get_question_with_answers(self, question_id: int) -> schemas.Question:
+        question = await get_question(self.session, question_id=question_id)
+        return schemas.Question.model_validate(question)
+
+
 if __name__ == "__main__":
     import asyncio
     from survio.db.database import create_tables
 
     async def main():
         await create_tables()
-        path = Path(__file__).parents[4] / "test.json"
-
-        parser = JSONParser(path)
 
         async for session in get_session():
-            await parser.create_survey_in_db(session)
-            print(f"Опрос успешно создан из: {path.name}")
+            survey_repo = SurveyRepository(session)
+            print(await survey_repo.get_question_with_answers(2))
             break
 
     asyncio.run(main())
