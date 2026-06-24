@@ -37,6 +37,9 @@ class Answers(Base):
     question: Mapped["Questions"] = relationship(
         back_populates="answers", foreign_keys=[question_id]
     )
+    next_question: Mapped["Questions"] = relationship(
+        back_populates="answers", foreign_keys=[next_question_id]
+    )
 
 
 class Questions(Base):
