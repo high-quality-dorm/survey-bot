@@ -2,6 +2,7 @@ from pydantic import BaseModel
 
 
 class Survey(BaseModel):
+    id: int
     uuid: str
     title: str
     description: str | None
@@ -10,6 +11,7 @@ class Survey(BaseModel):
 
 
 class Answer(BaseModel):
+    id: int
     answer: str | None
     next_question_id: int | None
 
@@ -17,6 +19,7 @@ class Answer(BaseModel):
 
 
 class Question(BaseModel):
+    id: int
     question: str
     survey: Survey
     answers: list[Answer]
