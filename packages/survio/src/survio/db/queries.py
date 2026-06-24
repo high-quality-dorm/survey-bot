@@ -1,15 +1,16 @@
-import uuid
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from survio.db import models
 
 
 async def create_survey(
-    session: AsyncSession, title: str, description: str | None
+    session: AsyncSession,
+    title: str,
+    description: str | None,
+    first_question_id: int = 0,
 ) -> models.Surveys:
     survey = models.Surveys(
-        uuid=str(uuid.uuid4()), title=title, description=description
+        title=title, description=description, first_question_id=first_question_id
     )
     session.add(survey)
     await session.flush()

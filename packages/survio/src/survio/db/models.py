@@ -2,6 +2,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from survio.db.database import Base
+import uuid
 
 
 class Users(Base):
@@ -48,14 +49,15 @@ class Questions(Base):
     answers: Mapped[list["Answers"]] = relationship(
         back_populates="question", foreign_keys=[Answers.question_id]
     )
-    survey: Mapped["Surveys"] = relationship(back_populates="questions")
+    survey: Mapped["Surveys"] = relationship("Surveys", back_populates="questions")
 
 
 class Surveys(Base):
     __tablename__ = "surveys"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    uuid: Mapped[str] = mapped_column(unique=True)
+    uuid: Mapped[str] = mapped_column(unique=True, default=str(uuid.uuid4()))
     title: Mapped[str] = mapped_column()
+    first_question_id: Mapped[int] = mapped_column()
     description: Mapped[str | None] = mapped_column()
 
     questions: Mapped[list["Questions"]] = relationship(back_populates="survey")

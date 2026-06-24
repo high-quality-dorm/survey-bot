@@ -17,7 +17,7 @@ class JSONParser:
             data = json.load(f)
         return schemas.SurveyJSON(**data)
 
-    async def create_survey_in_db(self, session: AsyncSession) -> None:
+    async def create_survey_in_db(self, session: AsyncSession) -> str:
         survey_json = self.parse()
         survey = await create_survey(
             session, title=survey_json.title, description=survey_json.description
@@ -27,6 +27,8 @@ class JSONParser:
             question = await create_question(
                 session, question=q.question, survey_id=survey.id
             )
+            if survey.first_question_id == 0:
+                survey.first_question_id = question.id
             questions[q.name] = (question, q.answers)
         for qstn in questions.values():
             for ans in qstn[1]:
@@ -46,6 +48,7 @@ class JSONParser:
                     answer=ans.answer,
                 )
         await session.commit()
+        return survey.uuid
 
 
 if __name__ == "__main__":
