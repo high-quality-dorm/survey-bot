@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase
 
-from survey_service.core.config import settings
+from survio.core.config import settings
 
 DATABASE_URL = settings.get_db_url()
 

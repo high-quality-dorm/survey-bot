@@ -2,13 +2,13 @@ import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from survey_service.db import models
-from survey_service.schemas import schemas
+from survio.db import models
+from survio.schemas import schemas
 
 
 async def create_survey(session: AsyncSession, survey_json: schemas.SurveyJSON):
     survey = models.Surveys(
-        uuid=uuid.uuid4, title=survey_json.title, description=survey_json.description
+        uuid=str(uuid.uuid4()), title=survey_json.title, description=survey_json.description
     )
     session.add(survey)
     await session.flush()

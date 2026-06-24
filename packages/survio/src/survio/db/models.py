@@ -1,7 +1,7 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from survey_service.db.database import Base
+from survio.db.database import Base
 
 
 class Users(Base):

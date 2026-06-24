@@ -24,9 +24,10 @@ class JSONParser:
 
 if __name__ == "__main__":
     import asyncio
-
+    from survio.db.database import create_tables
     async def main():
-        path = Path(__file__).parents[2] / "test.json"
+        await create_tables()
+        path = Path(__file__).parents[4] / "test.json"
 
         parser = JSONParser(path)
 
