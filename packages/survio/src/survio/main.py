@@ -71,9 +71,25 @@ class SurveyRepository:
         await self.session.commit()
         return schemas.User.model_validate(user)
 
-    async def answer_question(self, answer_id: int, user_id: int) -> schemas.Pass:
-        res = await create_pass(self.session, answer_id, user_id)
+    async def answer_question(self, answer_id: int, tg_id: int) -> schemas.Pass:
+        res = await create_pass(self.session, answer_id, tg_id)
+        await self.session.commit()
         return schemas.Pass.model_validate(res)
+
+    async def answer_and_get_next_question(
+        self, answer_id: int, tg_id: int
+    ) -> schemas.Question | None:
+        pass_schema = await self.answer_question(answer_id=answer_id, tg_id=tg_id)
+
+        if pass_schema is not None:
+            nxt_qstn_id = pass_schema.answer.next_question_id
+            if nxt_qstn_id is not None:
+                res = await get_question(self.session, question_id=nxt_qstn_id)
+            else:
+                return None
+        else:
+            return None
+        return schemas.Question.model_validate(res)
 
 
 if __name__ == "__main__":
@@ -85,7 +101,7 @@ if __name__ == "__main__":
 
         async for session in get_session():
             survey_repo = SurveyRepository(session)
-            print(await survey_repo.answer_question(1, 1))
+            print(await survey_repo.answer_and_get_next_question(1, 1))
             break
 
     asyncio.run(main())
