@@ -62,9 +62,17 @@ async def create_user(session: AsyncSession, tg_id: int, name: str) -> models.Us
 
 
 async def get_answer(session: AsyncSession, answer_id: int) -> models.Answers | None:
-    query = select(models.Answers).where(models.Answers.id == answer_id)
+    query = (
+        select(models.Answers)
+        .where(models.Answers.id == answer_id)
+        .options(
+            joinedload(models.Answers.passes),
+            joinedload(models.Answers.question),
+            joinedload(models.Answers.next_question),
+        )
+    )
     res = await session.execute(query)
-    return res.scalars().one_or_none()
+    return res.unique().scalars().one_or_none()
 
 
 async def get_user_by_tg_id(session: AsyncSession, tg_id: int) -> models.Users | None:
