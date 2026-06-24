@@ -5,17 +5,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .db.database import get_session
 from .db.queries import create_survey, create_question, create_answer
-from .schemas import schemas
+from survio.schemas import json_schemas
 
 
 class JSONParser:
     def __init__(self, file: Path):
         self.filepath = file
 
-    def parse(self) -> schemas.SurveyJSON:
+    def parse(self) -> json_schemas.SurveyJSON:
         with open(self.filepath, "r", encoding="utf-8") as f:
             data = json.load(f)
-        return schemas.SurveyJSON(**data)
+        return json_schemas.SurveyJSON(**data)
 
     async def create_survey_in_db(self, session: AsyncSession) -> str:
         survey_json = self.parse()
