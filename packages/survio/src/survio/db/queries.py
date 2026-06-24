@@ -61,10 +61,44 @@ async def create_user(session: AsyncSession, tg_id: int, name: str) -> models.Us
     return user
 
 
+async def get_answer(session: AsyncSession, answer_id: int) -> models.Answers | None:
+    query = select(models.Answers).where(models.Answers.id == answer_id)
+    res = await session.execute(query)
+    return res.scalars().one_or_none()
+
+
+async def get_user_by_tg_id(session: AsyncSession, tg_id: int) -> models.Users | None:
+    query = select(models.Users).where(models.Users.tg_id == tg_id)
+    res = await session.execute(query)
+    return res.scalars().one_or_none()
+
+
 async def create_pass(
-    session: AsyncSession, question_id: int, answer_id: int, user_id: int
-) -> models.Passes:
-    res = models.Passes(user_id=user_id, question_id=question_id, answer_id=answer_id)
+    session: AsyncSession, answer_id: int, tg_id: int
+) -> models.Passes | None:
+    ans = await get_answer(session=session, answer_id=answer_id)
+    if ans is not None:
+        question_id = ans.question_id
+    else:
+        return None
+    user = await get_user_by_tg_id(session=session, tg_id=tg_id)
+    if user is not None:
+        res = models.Passes(
+            user_id=user.id, question_id=question_id, answer_id=answer_id
+        )
+    else:
+        return None
     session.add(res)
     await session.flush()
-    return res
+
+    query = (
+        select(models.Passes)
+        .where(models.Passes.id == res.id)
+        .options(
+            joinedload(models.Passes.answer),
+            joinedload(models.Passes.question),
+            joinedload(models.Passes.user),
+        )
+    )
+    result = await session.execute(query)
+    return result.unique().scalars().one()
