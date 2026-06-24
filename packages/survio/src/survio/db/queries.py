@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from sqlalchemy.orm import joinedload
+from sqlalchemy import select
 from survio.db import models
 
 
@@ -37,3 +38,17 @@ async def create_answer(
     session.add(ans)
     await session.flush()
     return ans
+
+
+async def get_question(
+    session: AsyncSession, question_id: int
+) -> models.Questions | None:
+    query = (
+        select(models.Questions)
+        .where(models.Questions.id == question_id)
+        .options(
+            joinedload(models.Questions.answers), joinedload(models.Questions.survey)
+        )
+    )
+    result = await session.execute(query)
+    return result.unique().scalars().one_or_none()
