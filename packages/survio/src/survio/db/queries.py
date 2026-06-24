@@ -59,3 +59,12 @@ async def create_user(session: AsyncSession, tg_id: int, name: str) -> models.Us
     session.add(user)
     await session.flush()
     return user
+
+
+async def create_pass(
+    session: AsyncSession, question_id: int, answer_id: int, user_id: int
+) -> models.Passes:
+    res = models.Passes(user_id=user_id, question_id=question_id, answer_id=answer_id)
+    session.add(res)
+    await session.flush()
+    return res
