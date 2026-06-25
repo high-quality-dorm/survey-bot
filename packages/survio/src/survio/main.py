@@ -16,47 +16,14 @@ from survio.schemas import json_schemas, schemas
 
 
 class JSONParser:
-    def parse_file(self, file: Path) -> json_schemas.SurveyJSON:
+    def parse_file(self, file: Path | str) -> json_schemas.SurveyJSON:
         with open(file, "r", encoding="utf-8") as f:
             data = json.load(f)
         return json_schemas.SurveyJSON(**data)
-    
+
     def parse_str(self, string: str) -> json_schemas.SurveyJSON:
         data = json.loads(string)
         return json_schemas.SurveyJSON(**data)
-    
-    async def create_survey_in_db(self, session: AsyncSession) -> str:
-        survey_json = self.parse()
-        survey = await create_survey(
-            session, title=survey_json.title, description=survey_json.description
-        )
-        questions = dict()
-        for q in survey_json.questions:
-            question = await create_question(
-                session, question=q.question, survey_id=survey.id
-            )
-            if survey.first_question_id == 0:
-                survey.first_question_id = question.id
-            questions[q.name] = (question, q.answers)
-        for qstn in questions.values():
-            for ans in qstn[1]:
-                if ans.next_question is None:
-                    next_q_id = None
-                else:
-                    next_question_data = questions.get(ans.next_question)
-                    if next_question_data is not None:
-                        next_q_id = next_question_data[0].id
-                    else:
-                        next_q_id = None
-
-                await create_answer(
-                    session,
-                    qstn_id=qstn[0].id,
-                    nxt_qstn_id=next_q_id,
-                    answer=ans.answer,
-                )
-        await session.commit()
-        return survey.uuid
 
 
 class SurveyRepository:
@@ -91,6 +58,50 @@ class SurveyRepository:
         else:
             return None
         return schemas.Question.model_validate(res)
+
+    async def create_survey_in_db(self, survey_data: json_schemas.SurveyJSON) -> str:
+        survey = await create_survey(
+            self.session, title=survey_data.title, description=survey_data.description
+        )
+        questions = dict()
+        for q in survey_data.questions:
+            question = await create_question(
+                self.session, question=q.question, survey_id=survey.id
+            )
+            if survey.first_question_id == 0:
+                survey.first_question_id = question.id
+            questions[q.name] = (question, q.answers)
+        for qstn in questions.values():
+            for ans in qstn[1]:
+                if ans.next_question is None:
+                    next_q_id = None
+                else:
+                    next_question_data = questions.get(ans.next_question)
+                    if next_question_data is not None:
+                        next_q_id = next_question_data[0].id
+                    else:
+                        next_q_id = None
+
+                await create_answer(
+                    self.session,
+                    qstn_id=qstn[0].id,
+                    nxt_qstn_id=next_q_id,
+                    answer=ans.answer,
+                )
+        await self.session.commit()
+        return survey.uuid
+
+    async def parse_and_create_survey(self, json_data: Path | str) -> str:
+        parser = JSONParser()
+        if isinstance(json_data, Path):
+            survey_data = parser.parse_file(json_data)
+        else:
+            if ".json" in json_data:
+                survey_data = parser.parse_file(json_data)
+            else:
+                survey_data = parser.parse_str(json_data)
+
+        return await self.create_survey_in_db(survey_data)
 
 
 if __name__ == "__main__":
