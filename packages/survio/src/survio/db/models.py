@@ -7,9 +7,7 @@ import uuid
 
 class Users(Base):
     __tablename__ = "users"
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    tg_id: Mapped[int] = mapped_column(unique=True)
-    name: Mapped[str] = mapped_column()
+    id: Mapped[int] = mapped_column(primary_key=True)
 
     passes: Mapped[list["Passes"]] = relationship(back_populates="user")
 

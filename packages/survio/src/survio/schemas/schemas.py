@@ -29,8 +29,6 @@ class Question(BaseModel):
 
 class User(BaseModel):
     id: int
-    tg_id: int
-    name: str
 
     model_config = {"from_attributes": True}
 

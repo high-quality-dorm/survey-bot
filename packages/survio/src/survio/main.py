@@ -34,20 +34,20 @@ class SurveyRepository:
         question = await get_question(self.session, question_id=question_id)
         return schemas.Question.model_validate(question)
 
-    async def create_user(self, tg_id: int, name: str) -> schemas.User:
-        user = await create_user(self.session, tg_id=tg_id, name=name)
+    async def create_user(self, id: int) -> schemas.User:
+        user = await create_user(self.session, id=id)
         await self.session.commit()
         return schemas.User.model_validate(user)
 
-    async def answer_question(self, answer_id: int, tg_id: int) -> schemas.Pass:
-        res = await create_pass(self.session, answer_id, tg_id)
+    async def answer_question(self, answer_id: int, user_id: int) -> schemas.Pass:
+        res = await create_pass(self.session, answer_id, user_id)
         await self.session.commit()
         return schemas.Pass.model_validate(res)
 
     async def answer_and_get_next_question(
-        self, answer_id: int, tg_id: int
+        self, answer_id: int, user_id: int
     ) -> schemas.Question | None:
-        pass_schema = await self.answer_question(answer_id=answer_id, tg_id=tg_id)
+        pass_schema = await self.answer_question(answer_id=answer_id, user_id=user_id)
 
         if pass_schema is not None:
             nxt_qstn_id = pass_schema.answer.next_question_id
