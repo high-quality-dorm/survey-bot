@@ -16,14 +16,15 @@ from survio.schemas import json_schemas, schemas
 
 
 class JSONParser:
-    def __init__(self, file: Path):
-        self.filepath = file
-
-    def parse(self) -> json_schemas.SurveyJSON:
-        with open(self.filepath, "r", encoding="utf-8") as f:
+    def parse_file(self, file: Path) -> json_schemas.SurveyJSON:
+        with open(file, "r", encoding="utf-8") as f:
             data = json.load(f)
         return json_schemas.SurveyJSON(**data)
-
+    
+    def parse_str(self, string: str) -> json_schemas.SurveyJSON:
+        data = json.loads(string)
+        return json_schemas.SurveyJSON(**data)
+    
     async def create_survey_in_db(self, session: AsyncSession) -> str:
         survey_json = self.parse()
         survey = await create_survey(
