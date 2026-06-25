@@ -3,7 +3,6 @@ from pathlib import Path
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .db.database import get_session
 from .db.queries import (
     create_survey,
     create_question,
@@ -102,18 +101,3 @@ class SurveyRepository:
                 survey_data = parser.parse_str(json_data)
 
         return await self.create_survey_in_db(survey_data)
-
-
-if __name__ == "__main__":
-    import asyncio
-    from survio.db.database import create_tables
-
-    async def main():
-        await create_tables()
-
-        async for session in get_session():
-            survey_repo = SurveyRepository(session)
-            print(await survey_repo.answer_and_get_next_question(1, 1))
-            break
-
-    asyncio.run(main())
