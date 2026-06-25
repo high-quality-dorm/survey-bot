@@ -1,8 +1,8 @@
 from pydantic import BaseModel
-from survio.schemas.schemas import Answer
 
 
-class AnswerJSON(Answer):
+class AnswerJSON(BaseModel):
+    answer: str | None
     next_question: str | None
 
 
