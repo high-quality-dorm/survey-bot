@@ -1,6 +1,9 @@
+import uuid
+
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
-from sqlalchemy import select
+
 from survio.db import models
 
 
@@ -11,7 +14,10 @@ async def create_survey(
     first_question_id: int = 0,
 ) -> models.Surveys:
     survey = models.Surveys(
-        title=title, description=description, first_question_id=first_question_id
+        uuid=str(uuid.uuid4()),
+        title=title,
+        description=description,
+        first_question_id=first_question_id,
     )
     session.add(survey)
     await session.flush()
@@ -96,5 +102,12 @@ async def create_pass(
             joinedload(models.Passes.user),
         )
     )
+    result = await session.execute(query)
+    return result.unique().scalars().one()
+
+
+async def get_survey_by_uuid(session: AsyncSession, uuid: str) -> models.Surveys:
+    query = select(models.Surveys).where(models.Surveys.uuid == uuid)
+
     result = await session.execute(query)
     return result.unique().scalars().one()
