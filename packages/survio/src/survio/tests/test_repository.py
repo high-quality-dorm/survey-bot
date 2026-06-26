@@ -167,3 +167,90 @@ async def test_parse_and_create_survey_from_str(
     result = await survey_repo.parse_and_create_survey(json_str)
     survey_repo.create_survey_in_db.assert_awaited_once()
     assert result == "uuid-456"
+
+@pytest.mark.asyncio
+async def test_survey_by_uuid(mocker, survey_repo):
+    mock_survey = MagicMock()
+    mock_survey.id = 1
+    mock_survey.uuid = "test-uuid"
+    mock_survey.title = "Test Survey"
+    mock_survey.description = "Test Description"
+
+    mocker.patch("survio.main.get_survey_by_uuid", return_value=mock_survey)
+
+    result = await survey_repo.survey_by_uuid("test-uuid")
+
+    assert isinstance(result, schemas.Survey)
+    assert result.uuid == "test-uuid"
+    assert result.title == "Test Survey"
+    assert result.description == "Test Description"
+
+
+@pytest.mark.asyncio
+async def test_first_question(mocker, survey_repo):
+    mock_survey = MagicMock()
+    mock_survey.id = 1
+    mock_survey.uuid = "test-uuid"
+    mock_survey.title = "Test Survey"
+    mock_survey.description = "Test Description"
+
+    mock_question = MagicMock()
+    mock_question.id = 1
+    mock_question.question = "First question?"
+    mock_question.survey = mock_survey
+    mock_question.answers = []
+
+    mocker.patch("survio.main.get_first_question", return_value=mock_question)
+
+    result = await survey_repo.first_question("test-uuid")
+
+    assert isinstance(result, schemas.Question)
+    assert result.id == 1
+    assert result.question == "First question?"
+    assert result.survey.uuid == "test-uuid"
+    assert result.survey.title == "Test Survey"
+
+
+@pytest.mark.asyncio
+async def test_user_passes(mocker, survey_repo):
+    mock_question = MagicMock()
+    mock_question.id = 1
+    mock_question.question = "Question?"
+    mock_question.survey = MagicMock()
+
+    mock_answer = MagicMock()
+    mock_answer.id = 1
+    mock_answer.answer = "Answer text"
+    mock_answer.next_question_id = None
+
+    mock_pass = MagicMock()
+    mock_pass.id = 1
+    mock_pass.user_id = 1
+    mock_pass.question_id = 1
+    mock_pass.answer_id = 1
+    mock_pass.question = mock_question
+    mock_pass.answer = mock_answer
+
+    mocker.patch("survio.main.get_user_passes", return_value=[mock_pass])
+
+    result = await survey_repo.user_passes(survey_id=1, user_id=1)
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+    pass_schema = result[0]
+    assert isinstance(pass_schema, schemas.Pass)
+    assert pass_schema.id == 1
+    assert pass_schema.user_id == 1
+    assert pass_schema.question_id == 1
+    assert pass_schema.answer.id == 1
+    assert pass_schema.answer.answer == "Answer text"
+
+
+@pytest.mark.asyncio
+async def test_user_passes_empty(mocker, survey_repo):
+    mocker.patch("survio.main.get_user_passes", return_value=[])
+
+    result = await survey_repo.user_passes(survey_id=1, user_id=1)
+
+    assert isinstance(result, list)
+    assert result == []
