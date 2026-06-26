@@ -46,3 +46,13 @@ class UserPass(User):
     passes: Pass
 
     model_config = {"from_attributes": True}
+
+class AnswerExt(Answer):
+    question_id: int
+    question: Question
+
+class SurveyResult(BaseModel):
+    user: User
+    answers: list[AnswerExt]
+
+    model_config = {"from_attributes": True}

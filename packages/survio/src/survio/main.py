@@ -16,16 +16,20 @@ from .db.queries import (
     get_question,
     get_survey_by_uuid,
     get_user_passes,
+    get_user
 )
 
 
 class JSONParser:
-    def parse_file(self, file: Path | str) -> json_schemas.SurveyJSON:
+
+    @staticmethod
+    def parse_file(file: Path | str) -> json_schemas.SurveyJSON:
         with open(file, "r", encoding="utf-8") as f:
             data = json.load(f)
         return json_schemas.SurveyJSON(**data)
-
-    def parse_str(self, string: str) -> json_schemas.SurveyJSON:
+    
+    @staticmethod
+    def parse_str(string: str) -> json_schemas.SurveyJSON:
         data = json.loads(string)
         return json_schemas.SurveyJSON(**data)
 
@@ -95,18 +99,6 @@ class SurveyRepository:
         await self.session.commit()
         return survey.uuid
 
-    async def parse_and_create_survey(self, json_data: Path | str) -> str:
-        parser = JSONParser()
-        if isinstance(json_data, Path):
-            survey_data = parser.parse_file(json_data)
-        else:
-            if ".json" in json_data:
-                survey_data = parser.parse_file(json_data)
-            else:
-                survey_data = parser.parse_str(json_data)
-
-        return await self.create_survey_in_db(survey_data)
-
     async def survey_by_uuid(self, uuid: str) -> schemas.Survey:
         survey = await get_survey_by_uuid(self.session, uuid)
         return schemas.Survey.model_validate(survey)
@@ -122,3 +114,51 @@ class SurveyRepository:
     async def passes_by_uuid(self, uuid: str) -> list[schemas.Pass]:
         passes = await get_passes_by_uuid(self.session, uuid)
         return [schemas.Pass.model_validate(p) for p in passes]
+
+    async def get_user(self, user_id: int) -> schemas.User|None:
+        user = await self.get_user(self.session, user_id)
+        if user is None:
+            return None
+        else:
+            return schemas.User.model_validate(user)
+        
+class SurveyEngine:
+    def __init__(self, session: AsyncSession, user_id: int):
+        self.session = session
+        self.repository = SurveyRepository(session)
+        user = self.repository.get_user(user_id)
+        self.question = None
+
+        if user is None:
+            self.user = self.repository.create_user(user_id)
+        else:
+            self.user = user
+
+    async def get_survey(self, survey_uuid: str) -> schemas.Survey:
+        return await self.repository.survey_by_uuid(survey_uuid)
+    
+    async def load_survey(self, survey: Path|str) -> str:
+        if isinstance(survey, Path):
+            survey_data = JSONParser.parse_file(survey)
+        else:
+            if ".json" in survey:
+                survey_data = JSONParser.parse_file(survey)
+            else:
+                survey_data = JSONParser.parse_str(survey)
+
+        return await self.repository.create_survey_in_db(survey_data)
+    
+    async def start_survey(self, survey_uuid: str) -> schemas.Question:
+        self.question = await self.repository.first_question(survey_uuid)
+        return self.question
+    
+    def get_current_question(self) -> schemas.Question|None:
+        return self.question
+    
+    async def submit_answer(self, answer_id:int) -> schemas.Question:
+        self.question = await self.repository.answer_and_get_next_question(answer_id,self.user.id)
+        return self.question
+    
+    async def get_survey_result(self, survey_uuid:int) -> schemas.SurveyResult:
+        passes = await self.repository.user_passes(survey_uuid, self.user.id)
+        #add pydantic validate from list[Pass] to SurveyResult
