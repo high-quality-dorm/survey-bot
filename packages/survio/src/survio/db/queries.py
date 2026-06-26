@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -112,8 +112,30 @@ async def get_survey_by_uuid(session: AsyncSession, uuid: str) -> models.Surveys
     result = await session.execute(query)
     return result.unique().scalars().one()
 
+
 async def get_first_question(session: AsyncSession, uuid: str) -> models.Questions:
-    survey = await get_survey_by_uuid(session,uuid)
-    query = select(models.Questions).where(models.Questions.id==survey.first_question_id)
+    survey = await get_survey_by_uuid(session, uuid)
+    query = select(models.Questions).where(
+        models.Questions.id == survey.first_question_id
+    )
     result = await session.execute(query)
     return result.unique().scalars().one()
+
+
+async def get_user_passes(
+    session: AsyncSession, survey_id: int, user_id: int
+) -> list[models.Passes]:
+    query = (
+        select(models.Passes)
+        .join(models.Passes.question)
+        .options(joinedload(models.Passes.question))
+        .where(
+            and_(
+                models.Passes.user_id == user_id,
+                models.Questions.survey_id == survey_id,
+            )
+        )
+    )
+
+    result = await session.execute(query)
+    return result.unique().scalars().all()
