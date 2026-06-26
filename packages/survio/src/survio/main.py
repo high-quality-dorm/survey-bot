@@ -11,10 +11,11 @@ from .db.queries import (
     create_question,
     create_survey,
     create_user,
+    get_first_question,
+    get_passes_by_uuid,
     get_question,
     get_survey_by_uuid,
-    get_first_question,
-    get_user_passes
+    get_user_passes,
 )
 
 
@@ -105,15 +106,19 @@ class SurveyRepository:
                 survey_data = parser.parse_str(json_data)
 
         return await self.create_survey_in_db(survey_data)
-    
+
     async def survey_by_uuid(self, uuid: str) -> schemas.Survey:
         survey = await get_survey_by_uuid(self.session, uuid)
         return schemas.Survey.model_validate(survey)
-    
+
     async def first_question(self, uuid: str) -> schemas.Question:
         question = await get_first_question(self.session, uuid)
         return schemas.Question.model_validate(question)
-    
+
     async def user_passes(self, survey_id: int, user_id: int) -> list[schemas.Pass]:
         passes = await get_user_passes(self.session, survey_id, user_id)
         return [schemas.Pass.model_validate(i) for i in passes]
+
+    async def passes_by_uuid(self, uuid: str) -> list[schemas.Pass]:
+        passes = await get_passes_by_uuid(self.session, uuid)
+        return [schemas.Pass.model_validate(p) for p in passes]
