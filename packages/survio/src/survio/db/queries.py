@@ -1,4 +1,5 @@
 import uuid
+from typing import Sequence
 
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -115,26 +116,43 @@ async def get_survey_by_uuid(session: AsyncSession, uuid: str) -> models.Surveys
 
 async def get_first_question(session: AsyncSession, uuid: str) -> models.Questions:
     survey = await get_survey_by_uuid(session, uuid)
-    query = select(models.Questions).where(
-        models.Questions.id == survey.first_question_id
-    ).options(joinedload(models.Questions.survey))
+    query = (
+        select(models.Questions)
+        .where(models.Questions.id == survey.first_question_id)
+        .options(joinedload(models.Questions.survey))
+    )
     result = await session.execute(query)
     return result.unique().scalars().one()
 
 
 async def get_user_passes(
     session: AsyncSession, survey_id: int, user_id: int
-) -> list[models.Passes]:
+) -> Sequence[models.Passes]:
     query = (
         select(models.Passes)
         .join(models.Passes.question)
-        .options(joinedload(models.Passes.question),joinedload(models.Passes.answer))
+        .options(joinedload(models.Passes.question), joinedload(models.Passes.answer))
         .where(
             and_(
                 models.Passes.user_id == user_id,
                 models.Questions.survey_id == survey_id,
             )
         )
+    )
+
+    result = await session.execute(query)
+    return result.unique().scalars().all()
+
+
+async def get_passes_by_uuid(
+    session: AsyncSession, uuid: str
+) -> Sequence[models.Passes]:
+    query = (
+        select(models.Passes)
+        .join(models.Passes.question)
+        .join(models.Questions.survey)
+        .where(models.Surveys.uuid == uuid)
+        .options(joinedload(models.Passes.question), joinedload(models.Passes.answer))
     )
 
     result = await session.execute(query)
