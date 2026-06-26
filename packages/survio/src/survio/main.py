@@ -3,15 +3,16 @@ from pathlib import Path
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .db.queries import (
-    create_survey,
-    create_question,
-    create_answer,
-    get_question,
-    create_user,
-    create_pass,
-)
 from survio.schemas import json_schemas, schemas
+
+from .db.queries import (
+    create_answer,
+    create_pass,
+    create_question,
+    create_survey,
+    create_user,
+    get_question,
+)
 
 
 class JSONParser:

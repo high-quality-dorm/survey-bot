@@ -1,6 +1,8 @@
-import pytest
 from unittest.mock import MagicMock
-from survio.schemas import schemas, json_schemas
+
+import pytest
+
+from survio.schemas import json_schemas, schemas
 
 
 @pytest.mark.asyncio

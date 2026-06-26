@@ -1,4 +1,5 @@
 import json
+
 from survio.main import JSONParser
 from survio.schemas import json_schemas
 

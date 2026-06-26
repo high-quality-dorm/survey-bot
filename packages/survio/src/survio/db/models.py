@@ -2,7 +2,6 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from survio.db.database import Base
-import uuid
 
 
 class Users(Base):
@@ -56,7 +55,7 @@ class Questions(Base):
 class Surveys(Base):
     __tablename__ = "surveys"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    uuid: Mapped[str] = mapped_column(unique=True, default=str(uuid.uuid4()))
+    uuid: Mapped[str] = mapped_column(unique=True)
     title: Mapped[str] = mapped_column()
     first_question_id: Mapped[int] = mapped_column()
     description: Mapped[str | None] = mapped_column()
