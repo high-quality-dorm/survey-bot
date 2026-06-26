@@ -111,3 +111,9 @@ async def get_survey_by_uuid(session: AsyncSession, uuid: str) -> models.Surveys
 
     result = await session.execute(query)
     return result.unique().scalars().one()
+
+async def get_first_question(session: AsyncSession, uuid: str) -> models.Questions:
+    survey = await get_survey_by_uuid(session,uuid)
+    query = select(models.Questions).where(models.Questions.id==survey.first_question_id)
+    result = await session.execute(query)
+    return result.unique().scalars().one()
