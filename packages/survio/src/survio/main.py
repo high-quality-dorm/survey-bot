@@ -158,12 +158,16 @@ class SurveyEngine:
     def get_current_question(self) -> schemas.Question | None:
         return self.question
 
-    async def submit_answer(self, answer_id: int) -> schemas.Question:
+    async def submit_answer(self, answer_id: int) -> schemas.Question|None:
+        if self.user is None:
+            await self.init()
         self.question = await self.repository.answer_and_get_next_question(
             answer_id, self.user.id
         )
         return self.question
 
     async def get_survey_result(self, survey_uuid: int) -> schemas.SurveyResult:
+        if self.user is None:
+            await self.init()
         passes = await self.repository.user_passes(survey_uuid, self.user.id)
         # add pydantic validate from list[Pass] to SurveyResult

@@ -158,7 +158,8 @@ async def get_passes_by_uuid(
     result = await session.execute(query)
     return result.unique().scalars().all()
 
-async def get_user(session: AsyncSession, user_id: int) -> models.Users|None:
+
+async def get_user(session: AsyncSession, user_id: int) -> models.Users | None:
     query = select(models.Users).where(models.Users.id == user_id)
 
     result = await session.execute(query)
