@@ -117,7 +117,7 @@ async def get_first_question(session: AsyncSession, uuid: str) -> models.Questio
     survey = await get_survey_by_uuid(session, uuid)
     query = select(models.Questions).where(
         models.Questions.id == survey.first_question_id
-    )
+    ).options(joinedload(models.Questions.survey))
     result = await session.execute(query)
     return result.unique().scalars().one()
 
@@ -128,7 +128,7 @@ async def get_user_passes(
     query = (
         select(models.Passes)
         .join(models.Passes.question)
-        .options(joinedload(models.Passes.question))
+        .options(joinedload(models.Passes.question),joinedload(models.Passes.answer))
         .where(
             and_(
                 models.Passes.user_id == user_id,
