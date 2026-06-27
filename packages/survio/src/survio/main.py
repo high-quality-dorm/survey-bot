@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,6 +16,7 @@ from .db.queries import (
     get_passes_by_uuid,
     get_question,
     get_survey_by_uuid,
+    get_survey_passes_user_id,
     get_user,
     get_user_passes,
 )
@@ -121,6 +123,9 @@ class SurveyRepository:
         else:
             return schemas.User.model_validate(user)
 
+    async def survey_passes_user_id(self, survey_uuid: str) -> Sequence[int]:
+        return await get_survey_passes_user_id(self.session, survey_uuid)
+
 
 class SurveyEngine:
     def __init__(self, session: AsyncSession, user_id: int):
@@ -158,7 +163,7 @@ class SurveyEngine:
     def get_current_question(self) -> schemas.Question | None:
         return self.question
 
-    async def submit_answer(self, answer_id: int) -> schemas.Question|None:
+    async def submit_answer(self, answer_id: int) -> schemas.Question | None:
         if self.user is None:
             await self.init()
         self.question = await self.repository.answer_and_get_next_question(
@@ -166,8 +171,58 @@ class SurveyEngine:
         )
         return self.question
 
-    async def get_survey_result(self, survey_uuid: int) -> schemas.SurveyResult:
+    def _pass_2_answerext(self, pass_: schemas.Pass) -> schemas.AnswerExt:
+        return schemas.AnswerExt(
+            id=pass_.answer.id,
+            answer=pass_.answer.answer,
+            next_question_id=pass_.answer.next_question_id,
+            question_id=pass_.question_id,
+            question=pass_.question,
+        )
+
+    def _sort_answer_rec(self, data: list[schemas.AnswerExt], ind: int):
+        if ind == 0:
+            return
+        id_ = data[ind].question_id
+        for i in range(ind):
+            if data[i].next_question_id == id_:
+                ans = data.pop(i)
+                data.insert(ind - 1, ans)
+                break
+        self._sort_answer_rec(data, ind - 1)
+
+    def _sort_answers(self, data: list[schemas.AnswerExt]) -> None:
+        for i, ans in enumerate(data):
+            if ans.next_question_id is None:
+                data.pop(i)
+                data.append(ans)
+                break
+        else:
+            return None
+        self._sort_answer_rec(data, len(data) - 1)
+
+    async def get_survey_result(self, survey_uuid: str) -> schemas.SurveyResult:
         if self.user is None:
             await self.init()
-        passes = await self.repository.user_passes(survey_uuid, self.user.id)
-        # add pydantic validate from list[Pass] to SurveyResult
+
+        survey = await self.repository.survey_by_uuid(survey_uuid)
+
+        passes = await self.repository.user_passes(survey.id, self.user.id)
+        res = schemas.SurveyResult(user=self.user, answers=[])
+        for pass_ in passes:
+            ans = self._pass_2_answerext(pass_)
+            res.answers.append(ans)
+
+        self._sort_answers(res.answers)
+        return res
+
+    async def get_all_survey_results(
+        self, survey_uuid: str
+    ) -> list[schemas.SurveyResult]:
+        res = list()
+        ids = await self.repository.survey_passes_user_id(survey_uuid)
+        for id in ids:
+            eng = SurveyEngine(self.session, id)
+            await eng.init()
+            res.append(await eng.get_survey_result(survey_uuid))
+        return res
