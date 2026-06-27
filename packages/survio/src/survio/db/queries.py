@@ -164,3 +164,16 @@ async def get_user(session: AsyncSession, user_id: int) -> models.Users | None:
 
     result = await session.execute(query)
     return result.unique().scalars().one_or_none()
+
+
+async def get_survey_passes_user_id(
+    session: AsyncSession, survey_uuid: str
+) -> Sequence[int]:
+    query = (
+        select(models.Passes.user_id)
+        .join(models.Passes.question)
+        .join(models.Questions.survey)
+        .where(models.Surveys.uuid == survey_uuid)
+    )
+    result = await session.execute(query)
+    return result.unique().scalars().all()
