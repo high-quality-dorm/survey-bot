@@ -38,6 +38,7 @@ class Pass(BaseModel):
     user_id: int
     question_id: int
     answer: Answer
+    question: Question
 
     model_config = {"from_attributes": True}
 
