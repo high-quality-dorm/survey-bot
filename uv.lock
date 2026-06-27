@@ -298,6 +298,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "mkinit" },
     { name = "mypy" },
     { name = "ruff" },
 ]
@@ -312,6 +313,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "mkinit", specifier = ">=1.2.0" },
     { name = "mypy", specifier = ">=2.1.0" },
     { name = "ruff", specifier = ">=0.15.18" },
 ]
@@ -602,6 +604,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e6/08/da7c2cc7398cc0376e8da599d6330a437c01d3eace2f2365f300e0f3f758/magic_filter-1.0.12.tar.gz", hash = "sha256:4751d0b579a5045d1dc250625c4c508c18c3def5ea6afaf3957cb4530d03f7f9", size = 11071, upload-time = "2023-10-01T12:33:19.006Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/cc/75/f620449f0056eff0ec7c1b1e088f71068eb4e47a46eb54f6c065c6ad7675/magic_filter-1.0.12-py3-none-any.whl", hash = "sha256:e5929e544f310c2b1f154318db8c5cdf544dd658efa998172acd2e4ba0f6c6a6", size = 11335, upload-time = "2023-10-01T12:33:17.711Z" },
+]
+
+[[package]]
+name = "mkinit"
+version = "1.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "ubelt" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/77/f7/a1bf60ea227c983f8b705ba41fa8db7c2949ca04239f227d5fd62a404cdf/mkinit-1.2.0.tar.gz", hash = "sha256:4b776ca991ccedbb202b079bd3e573d753121baa2a4f330324247325c9a1d346", size = 76556, upload-time = "2025-12-02T16:22:03.556Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f2/c1/5cac576344167d1a21dc569d39e4aa230626a5a457d4f0ea514f27caa124/mkinit-1.2.0-py3-none-any.whl", hash = "sha256:172755988cdcdc5212d0b76b586ec4765c2bff9ae41266a93f5f4b962c3d2def", size = 70919, upload-time = "2025-12-02T16:22:00.967Z" },
 ]
 
 [[package]]
@@ -1165,6 +1179,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/55/e3/70399cb7dd41c10ac53367ae42139cf4b1ca5f36bb3dc6c9d33acdb43655/typing_inspection-0.4.2.tar.gz", hash = "sha256:ba561c48a67c5958007083d386c3295464928b01faa735ab8547c5692e87f464", size = 75949, upload-time = "2025-10-01T02:14:41.687Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/dc/9b/47798a6c91d8bdb567fe2698fe81e0c6b7cb7ef4d13da4114b41d239f65d/typing_inspection-0.4.2-py3-none-any.whl", hash = "sha256:4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7", size = 14611, upload-time = "2025-10-01T02:14:40.154Z" },
+]
+
+[[package]]
+name = "ubelt"
+version = "1.4.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/97/39/a2ca653ee2500ae963e38b6b3a38d02f7c4ea72a3e5af410c6d66f058ed6/ubelt-1.4.2.tar.gz", hash = "sha256:40322cf3bb59c05b7567222b10bd0d553c6abc463cd480c23ea3dbcf2ef332fb", size = 305863, upload-time = "2026-04-13T02:38:15.703Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/01/b9/b6ee2a03975b398b428b1ed8ce2f1a598e2b9cc01ad2c6d49cfce3bb5a9b/ubelt-1.4.2-py3-none-any.whl", hash = "sha256:6cdbcbba75cd7c3e1ef9556a13b7c0e29a55f67cb454f022a981e42808f2b06e", size = 231820, upload-time = "2026-04-13T02:38:13.094Z" },
 ]
 
 [[package]]
