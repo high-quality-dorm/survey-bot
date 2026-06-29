@@ -8,7 +8,7 @@ from typing import Sequence
 
 class SurveyRepository(BaseRepository["Survey"]):
     async def get_by_uuid(self,uuid:str,session: AsyncSession):
-        query = select(self.model.Surveys).where(self.model.Surveys.uuid == uuid)
+        query = select(self.model).where(self.model.Surveys.uuid == uuid)
 
         result = await session.execute(query)
         return result.unique().scalars().one()
@@ -16,9 +16,9 @@ class SurveyRepository(BaseRepository["Survey"]):
     async def get_first_question(self, uuid:str,session:AsyncSession):
         survey = await self.get_by_uuid(uuid,session)
         query = (
-            select(self.model)
-            .where(self.model.id == survey.first_question_id)
-            .options(joinedload(self.model.survey))
+            select(Questions)
+            .where(Questions.id == survey.first_question_id)
+            .options(joinedload(Questions.survey))
         )
         result = await session.execute(query)
         return result.unique().scalars().one()

@@ -12,7 +12,7 @@ class BaseRepository(Generic[ModelType]):
 
     async def create(self, new_object: ModelType, session: AsyncSession) -> None:
         session.add(new_object)
-        await session.commit()
+
 
     async def get_all(self, session: AsyncSession) -> Sequence[ModelType]:
         query = select(self.model)
