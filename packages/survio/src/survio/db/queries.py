@@ -8,45 +8,6 @@ from sqlalchemy.orm import joinedload
 from survio.db import models
 
 
-async def create_survey(
-    session: AsyncSession,
-    title: str,
-    description: str | None,
-    first_question_id: int = 0,
-) -> models.Surveys:
-    survey = models.Surveys(
-        uuid=str(uuid.uuid4()),
-        title=title,
-        description=description,
-        first_question_id=first_question_id,
-    )
-    session.add(survey)
-    await session.flush()
-    return survey
-
-
-async def create_question(
-    session: AsyncSession, question: str, survey_id
-) -> models.Questions:
-    qstn = models.Questions(question=question, survey_id=survey_id)
-    session.add(qstn)
-    await session.flush()
-    return qstn
-
-
-async def create_answer(
-    session: AsyncSession, qstn_id: int, nxt_qstn_id: int | None, answer: str | None
-) -> models.Answers:
-    ans = models.Answers(
-        question_id=qstn_id,
-        next_question_id=nxt_qstn_id,
-        answer=answer,
-    )
-    session.add(ans)
-    await session.flush()
-    return ans
-
-
 async def get_question(
     session: AsyncSession, question_id: int
 ) -> models.Questions | None:
@@ -59,13 +20,6 @@ async def get_question(
     )
     result = await session.execute(query)
     return result.unique().scalars().one_or_none()
-
-
-async def create_user(session: AsyncSession, id: int) -> models.Users:
-    user = models.Users(id=id)
-    session.add(user)
-    await session.flush()
-    return user
 
 
 async def get_answer(session: AsyncSession, answer_id: int) -> models.Answers | None:
@@ -157,13 +111,6 @@ async def get_passes_by_uuid(
 
     result = await session.execute(query)
     return result.unique().scalars().all()
-
-
-async def get_user(session: AsyncSession, user_id: int) -> models.Users | None:
-    query = select(models.Users).where(models.Users.id == user_id)
-
-    result = await session.execute(query)
-    return result.unique().scalars().one_or_none()
 
 
 async def get_survey_passes_user_id(
