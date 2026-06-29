@@ -8,20 +8,6 @@ from sqlalchemy.orm import joinedload
 from survio.db import models
 
 
-async def get_question(
-    session: AsyncSession, question_id: int
-) -> models.Questions | None:
-    query = (
-        select(models.Questions)
-        .where(models.Questions.id == question_id)
-        .options(
-            joinedload(models.Questions.answers), joinedload(models.Questions.survey)
-        )
-    )
-    result = await session.execute(query)
-    return result.unique().scalars().one_or_none()
-
-
 async def get_answer(session: AsyncSession, answer_id: int) -> models.Answers | None:
     query = (
         select(models.Answers)
