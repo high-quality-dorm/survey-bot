@@ -3,16 +3,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from survio.repositories.base_repository import BaseRepository
+from survio.db.models import Question
 
-
-class QuestionRepository(BaseRepository["User"]):
+class QuestionRepository(BaseRepository["Question"]):
     async def get_with_relationship(self, id: int, session: AsyncSession):
         query = (
-            select(self.model.Questions)
-            .where(self.model.Questions.id == id)
+            select(self.model)
+            .where(self.model.id == id)
             .options(
-                joinedload(self.model.Questions.answers),
-                joinedload(self.model.Questions.survey),
+                joinedload(self.model.answers),
+                joinedload(self.model.survey),
             )
         )
         result = await session.execute(query)
