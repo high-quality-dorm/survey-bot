@@ -2,7 +2,7 @@ run:
 	uv run python -m src.survio.main
 
 test:
-	uv run pytest src/survio/tests
+	uv run pytest tests
 
 lint:
 	uv run mypy src/survio
