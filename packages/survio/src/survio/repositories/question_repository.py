@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from survio.repositories.base_repository import BaseRepository
-from survio.db.models import Question
+from survio.db.models import Questions
 
-class QuestionRepository(BaseRepository["Question"]):
+class QuestionRepository(BaseRepository["Questions"]):
     async def get_with_relationship(self, id: int, session: AsyncSession):
         query = (
             select(self.model)

@@ -3,12 +3,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from survio.repositories.base_repository import BaseRepository
-from survio.db.models import Survey,Passes,Questions
+from survio.db.models import Surveys,Passes,Questions
 from typing import Sequence
 
-class SurveyRepository(BaseRepository["Survey"]):
+class SurveyRepository(BaseRepository["Surveys"]):
     async def get_by_uuid(self,uuid:str,session: AsyncSession):
-        query = select(self.model).where(self.model.Surveys.uuid == uuid)
+        query = select(self.model).where(self.model.uuid == uuid)
 
         result = await session.execute(query)
         return result.unique().scalars().one()
