@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     token: str
+    proxy: str | None = None
 
     db_host: str
     db_port: str
@@ -22,4 +23,4 @@ class Settings(BaseSettings):
     )
 
 
-settings = Settings()
+settings = Settings(**{})

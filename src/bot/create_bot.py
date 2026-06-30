@@ -3,6 +3,7 @@ from asyncio import CancelledError
 from pathlib import Path
 
 from aiogram import Bot, Dispatcher
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram_i18n import I18nMiddleware
 from aiogram_i18n.cores import FluentCompileCore
 
@@ -15,7 +16,9 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
-bot = Bot(token=settings.token)
+session = AiohttpSession(proxy=settings.proxy) if settings.proxy else AiohttpSession()
+
+bot = Bot(token=settings.token, session=session)
 dp = Dispatcher(drop_pending_updates=True)
 
 
