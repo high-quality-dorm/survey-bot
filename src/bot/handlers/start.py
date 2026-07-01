@@ -18,14 +18,9 @@ async def handle_cmd_start(
 ) -> None:
     assert message.from_user is not None
 
-    user: User | None = await user_repo.get_user(tg_id=message.from_user.id)
-
-    if not user:
-        user = await user_repo.create_user(
-            tg_id=message.from_user.id, core_id="core_id"
-        )
+    await user_repo.get_or_create_user(tg_id=message.from_user.id, core_id=None)
 
     await message.answer(
-        text=i18n.get("cmd-start", name=user.core_id),
+        text=i18n.get("cmd-start", name=message.from_user.full_name),
         reply_markup=get_to_menu_kb(),
     )
