@@ -15,3 +15,10 @@ venv
 # environment var
 .env
 !.env.example
+
+#coverage
+.coverage
+htmlcov
+
+#database
+*.db
