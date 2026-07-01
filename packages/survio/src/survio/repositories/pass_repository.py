@@ -9,7 +9,7 @@ from survio.repositories.base_repository import BaseRepository
 
 
 class PassRepository(BaseRepository["Passes"]):
-    async def get_with_relationship(self, id: int, session: AsyncSession):
+    async def get_with_relationship(self, id: int, session: AsyncSession) -> Passes|None:
         query = (
             select(self.model)
             .where(self.model.id == id)
@@ -21,7 +21,7 @@ class PassRepository(BaseRepository["Passes"]):
             )
         )
         result = await session.execute(query)
-        return result.unique().scalars().one()
+        return result.unique().scalars().one_or_none()
 
     async def get_user_passes(
         self, survey_id: int, user_id: int, session: AsyncSession

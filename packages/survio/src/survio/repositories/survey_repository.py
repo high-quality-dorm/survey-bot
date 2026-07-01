@@ -6,16 +6,16 @@ from sqlalchemy.orm import joinedload
 
 from survio.db.models import Passes, Questions
 from survio.repositories.base_repository import BaseRepository
-
+from survio.db import models
 
 class SurveyRepository(BaseRepository["Surveys"]):
-    async def get_by_uuid(self, uuid: str, session: AsyncSession):
+    async def get_by_uuid(self, uuid: str, session: AsyncSession) -> models.Surveys|None:
         query = select(self.model).where(self.model.uuid == uuid)
 
         result = await session.execute(query)
-        return result.unique().scalars().one()
+        return result.unique().scalars().one_or_none()
 
-    async def get_first_question(self, uuid: str, session: AsyncSession):
+    async def get_first_question(self, uuid: str, session: AsyncSession) -> models.Questions|None:
         survey = await self.get_by_uuid(uuid, session)
         query = (
             select(Questions)
@@ -23,9 +23,9 @@ class SurveyRepository(BaseRepository["Surveys"]):
             .options(joinedload(Questions.survey), joinedload(Questions.answers))
         )
         result = await session.execute(query)
-        return result.unique().scalars().one()
+        return result.unique().scalars().one_or_none()
 
-    async def get_passes_by_uuid(self, uuid: str, session: AsyncSession):
+    async def get_passes_by_uuid(self, uuid: str, session: AsyncSession) ->Sequence[models.Passes]:
         query = (
             select(Passes)
             .join(Passes.question)
