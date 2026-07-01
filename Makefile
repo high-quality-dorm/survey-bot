@@ -1,5 +1,17 @@
-run:
+run-bot:
 	uv run -m bot
+
+up:
+	docker compose up -d
+
+up-b:
+	docker compose up -d --build
+
+down:
+	docker compose down
+
+down-v:
+	docker compose down --volumes
 
 lint:
 	uv run mypy src/
