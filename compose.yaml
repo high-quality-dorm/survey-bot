@@ -1,8 +1,10 @@
+
+name: survio
+
 services:
   bot:
     build:
       dockerfile: Dockerfile
-    container_name: bot
     restart: unless-stopped
     environment:
       - DB_HOST=db
@@ -16,7 +18,6 @@ services:
 
   db:
     image: postgres:15-alpine
-    container_name: db
     restart: unless-stopped
     environment:
       - POSTGRES_USER=${DB_USER}
