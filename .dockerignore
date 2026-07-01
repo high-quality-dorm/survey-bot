@@ -1,0 +1,28 @@
+
+# python cache
+**/__pycache__
+*.py[cod]
+
+# other cache
+.mypy_cache
+.ruff_cache
+.pytest_cache
+
+# virtual environment
+.venv
+venv
+
+# environment var
+.env
+!.env.example
+
+# git
+.git
+.gitignore
+
+# docker
+Dockerfile
+.dockerignore
+
+# other
+Makefile
