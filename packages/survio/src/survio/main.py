@@ -48,10 +48,7 @@ class SurveyEngine:
         if isinstance(survey, Path):
             survey_data = JSONParser.parse_file(survey)
         else:
-            if ".json" in survey:
-                survey_data = JSONParser.parse_file(survey)
-            else:
-                survey_data = JSONParser.parse_str(survey)
+            survey_data = JSONParser.parse_str(survey)
         return await self.survey_service.create_survey_from_json(
             survey_data, self.session
         )
