@@ -11,6 +11,6 @@ btn-menu-create = Создать опрос
 btn-menu-start-survey = Начать опрос
 btn-menu-statistics = Статистика
 
-menu-create = Меню создания
+menu-create = Меню создания опроса. Введите json строку в нужном формате
 menu-start-survey = Меню начала
 menu-statistics = Меню статистик
