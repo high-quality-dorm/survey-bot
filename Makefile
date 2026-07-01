@@ -18,6 +18,9 @@ lint:
 	uv run ruff check src/
 	uv run ruff format src/ --check
 
+lint-fix:
+	uv run ruff check --fix src/
+
 format:
 	uv run ruff check --select I --fix src/
 	uv run ruff format src/

@@ -9,4 +9,4 @@ class User(Base):
     tg_id: Mapped[int] = mapped_column(
         BigInteger, primary_key=True, unique=True, nullable=False
     )
-    core_id: Mapped[str] = mapped_column()
+    core_id: Mapped[str] = mapped_column(nullable=True)
