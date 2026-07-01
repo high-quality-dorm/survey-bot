@@ -10,7 +10,7 @@ from survio.repositories.question_repository import QuestionRepository
 from survio.repositories.survey_repository import SurveyRepository
 from survio.repositories.user_repository import UserRepository
 from survio.schemas import json_schemas, schemas
-
+from survio import exceptions
 
 class SurveyService:
     def __init__(self):
@@ -168,7 +168,7 @@ class SurveyService:
                 first = answers.pop(i)
                 break
         else:
-            return
+            raise exceptions.NoFirstQuestionAnswer()
         answers.insert(0, first)
 
         self._rec_sort(0, answers)
