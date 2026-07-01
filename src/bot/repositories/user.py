@@ -17,7 +17,7 @@ class UserRepository:
             await session.refresh(user)
             return user
 
-    async def get_user(self, tg_id: int) -> User:
+    async def get_user(self, tg_id: int) -> User | None:
         async with get_session() as session:
             statement = select(User).filter_by(tg_id=tg_id)
             result = await session.execute(statement)

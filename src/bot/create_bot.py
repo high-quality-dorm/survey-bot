@@ -8,7 +8,9 @@ from aiogram_i18n import I18nMiddleware
 from aiogram_i18n.cores import FluentCompileCore
 
 from bot.core import settings
+from bot.db import create_tables
 from bot.handlers import main_router
+from bot.middlewares.common import DatabaseMiddleware
 
 logging.basicConfig(
     format="%(levelname)s [%(asctime)s]: %(message)s",
@@ -20,7 +22,7 @@ session = AiohttpSession(proxy=settings.proxy) if settings.proxy else AiohttpSes
 
 bot = Bot(token=settings.token, session=session)
 dp = Dispatcher(drop_pending_updates=True)
-
+dp.message.middleware(middleware=DatabaseMiddleware())
 
 LOCALES = Path(__file__).resolve().parent / "locales"
 i18n_middleware = I18nMiddleware(
@@ -33,6 +35,9 @@ dp.include_router(main_router)
 
 
 async def run() -> None:
+
+    await create_tables()
+
     try:
         logging.info("Bot is starting")
         await dp.start_polling(bot)
