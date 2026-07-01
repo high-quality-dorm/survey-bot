@@ -76,7 +76,6 @@ def sample_survey_json():
             {
                 "name": "q1",
                 "question": "First question?",
-                "type": "button",
                 "answers": [
                     {"answer": "Yes", "next_question": "q2"},
                     {"answer": "No", "next_question": None}
@@ -85,7 +84,6 @@ def sample_survey_json():
             {
                 "name": "q2",
                 "question": "Second question?",
-                "type": "button",
                 "answers": [{"answer": "Ok", "next_question": None}]
             }
         ]
