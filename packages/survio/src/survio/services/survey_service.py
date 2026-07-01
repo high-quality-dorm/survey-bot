@@ -1,14 +1,15 @@
 import uuid
 from typing import Sequence
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from survio.repositories.survey_repository import SurveyRepository
-from survio.repositories.question_repository import QuestionRepository
+from survio.db.models import Answers, Passes, Questions, Surveys, Users
 from survio.repositories.answer_repository import AnswerRepository
 from survio.repositories.pass_repository import PassRepository
+from survio.repositories.question_repository import QuestionRepository
+from survio.repositories.survey_repository import SurveyRepository
 from survio.repositories.user_repository import UserRepository
-from survio.db.models import Surveys, Questions, Answers, Passes, Users
-from survio.schemas import schemas, json_schemas
+from survio.schemas import json_schemas, schemas
 
 
 class SurveyService:
@@ -23,15 +24,21 @@ class SurveyService:
         survey = await self.survey_repo.get_by_uuid(uuid, session)
         return schemas.Survey.model_validate(survey)
 
-    async def get_first_question(self, uuid: str, session: AsyncSession) -> schemas.Question:
+    async def get_first_question(
+        self, uuid: str, session: AsyncSession
+    ) -> schemas.Question:
         question = await self.survey_repo.get_first_question(uuid, session)
         return schemas.Question.model_validate(question)
 
-    async def get_passes_by_uuid(self, uuid: str, session: AsyncSession) -> list[schemas.Pass]:
+    async def get_passes_by_uuid(
+        self, uuid: str, session: AsyncSession
+    ) -> list[schemas.Pass]:
         passes = await self.survey_repo.get_passes_by_uuid(uuid, session)
         return [schemas.Pass.model_validate(p) for p in passes]
 
-    async def get_survey_passes_user_ids(self, uuid: str, session: AsyncSession) -> Sequence[int]:
+    async def get_survey_passes_user_ids(
+        self, uuid: str, session: AsyncSession
+    ) -> Sequence[int]:
         return await self.survey_repo.get_survey_passes_user_id(session, uuid)
 
     async def create_survey_from_json(
@@ -81,7 +88,7 @@ class SurveyService:
 
         await session.commit()
         return survey.uuid
-    
+
     async def submit_answer(
         self, answer_id: int, user_id: int, session: AsyncSession
     ) -> schemas.Pass:
@@ -108,12 +115,16 @@ class SurveyService:
 
         user = await self.user_repo.get(user_id, session)
 
-        result = schemas.SurveyResult(user=schemas.User.model_validate(user), answers=[])
+        result = schemas.SurveyResult(
+            user=schemas.User.model_validate(user), answers=[]
+        )
 
         for p in passes:
-            question = await self.question_repo.get_with_relationship(p.question_id, session)
+            question = await self.question_repo.get_with_relationship(
+                p.question_id, session
+            )
             if question is None:
-                continue 
+                continue
 
             ans_ext = schemas.AnswerExt(
                 id=p.answer.id,
@@ -137,8 +148,8 @@ class SurveyService:
             results.append(result)
         return results
 
-    def _rec_sort(self, index:int, answers: list[schemas.AnswerExt]) -> None:
-        if index== len(answers) -1:
+    def _rec_sort(self, index: int, answers: list[schemas.AnswerExt]) -> None:
+        if index == len(answers) - 1:
             return
         id_ = answers[index].next_question_id
         for i in range(index, len(answers)):
@@ -146,9 +157,11 @@ class SurveyService:
                 ans = answers.pop(i)
                 answers.insert(index + 1, ans)
                 break
-        self._rec_sort(index+1, answers)
+        self._rec_sort(index + 1, answers)
 
-    def _sort_answers(self, frst_qstn_id: int, answers: list[schemas.AnswerExt]) -> None:
+    def _sort_answers(
+        self, frst_qstn_id: int, answers: list[schemas.AnswerExt]
+    ) -> None:
 
         for i in range(len(answers)):
             if answers[i].question_id == frst_qstn_id:
@@ -156,6 +169,14 @@ class SurveyService:
                 break
         else:
             return
-        answers.insert(0,first)
+        answers.insert(0, first)
 
-        self._rec_sort(0,answers)
+        self._rec_sort(0, answers)
+
+    async def get_question_with_answers(
+        self, question_id: int, session: AsyncSession
+    ) -> schemas.Question | None:
+        question = await self.question_repo.get_with_relationship(question_id, session)
+        if question is None:
+            return None
+        return schemas.Question.model_validate(question)

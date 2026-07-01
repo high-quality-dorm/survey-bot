@@ -1,6 +1,6 @@
-from typing import Generic, Protocol, Sequence, Type, TypeVar
+from typing import Generic, Sequence, Type, TypeVar
 
-from sqlalchemy import and_, delete, select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 ModelType = TypeVar("ModelType")
@@ -12,7 +12,6 @@ class BaseRepository(Generic[ModelType]):
 
     async def create(self, new_object: ModelType, session: AsyncSession) -> None:
         session.add(new_object)
-
 
     async def get_all(self, session: AsyncSession) -> Sequence[ModelType]:
         query = select(self.model)

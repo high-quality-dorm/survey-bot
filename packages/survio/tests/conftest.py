@@ -66,3 +66,27 @@ def pass_repo():
 @pytest.fixture
 def user_repo():
     return UserRepository(Users)
+
+@pytest.fixture
+def sample_survey_json():
+    return {
+        "title": "Test Survey",
+        "description": "Desc",
+        "questions": [
+            {
+                "name": "q1",
+                "question": "First question?",
+                "type": "button",
+                "answers": [
+                    {"answer": "Yes", "next_question": "q2"},
+                    {"answer": "No", "next_question": None}
+                ]
+            },
+            {
+                "name": "q2",
+                "question": "Second question?",
+                "type": "button",
+                "answers": [{"answer": "Ok", "next_question": None}]
+            }
+        ]
+    }

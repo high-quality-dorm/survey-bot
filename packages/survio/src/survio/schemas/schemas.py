@@ -7,7 +7,7 @@ class Survey(BaseModel):
     title: str
     description: str | None
     first_question_id: int
-    
+
     model_config = {"from_attributes": True}
 
 

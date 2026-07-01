@@ -1,7 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from survio.repositories.base_repository import BaseRepository
+
 from survio.db.models import Users
+from survio.repositories.base_repository import BaseRepository
 from survio.schemas import schemas
+
 
 class UserService:
     def __init__(self):
