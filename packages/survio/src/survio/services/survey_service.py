@@ -1,8 +1,6 @@
-# services/survey_service.py
 import uuid
 from typing import Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import NoResultFound
 
 from survio.repositories.survey_repository import SurveyRepository
 from survio.repositories.question_repository import QuestionRepository
@@ -156,6 +154,8 @@ class SurveyService:
             if answers[i].question_id == frst_qstn_id:
                 first = answers.pop(i)
                 break
+        else:
+            return
         answers.insert(0,first)
 
         self._rec_sort(0,answers)
