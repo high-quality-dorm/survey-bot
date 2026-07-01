@@ -1,4 +1,4 @@
-from sqlalchemy import and_, delete, select
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -13,7 +13,7 @@ class PassRepository(BaseRepository["Passes"]):
             .where(self.model.id == id)
             .options(
                 joinedload(self.model.answer),
-                joinedload(self.model.question),
+                joinedload(self.model.question).joinedload(Questions.answers),
                 joinedload(self.model.user),
             )
         )
@@ -26,7 +26,7 @@ class PassRepository(BaseRepository["Passes"]):
         query = (
             select(self.model)
             .join(self.model.question)
-            .options(joinedload(self.model.question), joinedload(self.model.answer))
+            .options(joinedload(self.model.question).joinedload(Questions.answers), joinedload(self.model.answer))
             .where(
                 and_(
                     self.model.user_id == user_id,

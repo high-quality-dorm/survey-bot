@@ -1,9 +1,9 @@
-from sqlalchemy import and_, delete, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from survio.repositories.base_repository import BaseRepository
-from survio.db.models import Surveys,Passes,Questions
+from survio.db.models import Passes,Questions
 from typing import Sequence
 
 class SurveyRepository(BaseRepository["Surveys"]):
@@ -18,7 +18,7 @@ class SurveyRepository(BaseRepository["Surveys"]):
         query = (
             select(Questions)
             .where(Questions.id == survey.first_question_id)
-            .options(joinedload(Questions.survey))
+            .options(joinedload(Questions.survey),joinedload(Questions.answers))
         )
         result = await session.execute(query)
         return result.unique().scalars().one()
