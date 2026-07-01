@@ -1,6 +1,7 @@
 import pytest
 from survio.services.survey_service import SurveyService
 from survio.schemas import schemas
+from survio.exceptions import NoFirstQuestionAnswer
 
 def create_answer_ext(qid, next_qid, ans_text):
     return schemas.AnswerExt(
@@ -42,6 +43,5 @@ def test_sort_answers_no_first(service):
     ans2 = create_answer_ext(2, None, "A2")
     ans1 = create_answer_ext(1, 2, "A1")
     answers = [ans2, ans1]
-    service._sort_answers(99, answers)
-    assert answers[0].question_id == 2
-    assert answers[1].question_id == 1
+    with pytest.raises(NoFirstQuestionAnswer):
+        service._sort_answers(99, answers)
