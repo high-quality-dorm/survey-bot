@@ -12,6 +12,7 @@ from survio.repositories.question_repository import QuestionRepository
 from survio.repositories.answer_repository import AnswerRepository
 from survio.repositories.pass_repository import PassRepository
 from survio.repositories.user_repository import  UserRepository
+from survio.main import SurveyEngine
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///database.db"
 
@@ -42,6 +43,9 @@ async def session(engine):
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
 
+@pytest.fixture
+def survey_engine(session):
+    return SurveyEngine(user_id=1, session=session)
 
 @pytest.fixture
 def survey_repo():
