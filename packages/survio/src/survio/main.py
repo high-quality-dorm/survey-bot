@@ -4,6 +4,7 @@ from pathlib import Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from survio.schemas import json_schemas, schemas
+from survio.services.answer_service import AnswerService
 from survio.services.pass_service import PassService
 from survio.services.survey_service import SurveyService
 from survio.services.user_service import UserService
@@ -28,6 +29,7 @@ class SurveyEngine:
         self.survey_service = SurveyService()
         self.pass_service = PassService()
         self.user_service = UserService()
+        self.answer_service = AnswerService()
         self.user: schemas.User | None = None
         self.question: schemas.Question | None = None
         self._user_id: int = user_id
@@ -62,13 +64,28 @@ class SurveyEngine:
     def get_current_question(self) -> schemas.Question | None:
         return self.question
 
-    async def submit_answer(self, answer_id: int) -> schemas.Question | None:
+    async def submit_answer(
+        self, answer_id: int, answer: str | None = None
+    ) -> schemas.Question | None:
         if self.user is None:
             await self.init()
-        pass_schema = await self.survey_service.submit_answer(
-            answer_id, self._user_id, self.session
-        )
-        next_q_id = pass_schema.answer.next_question_id
+        answer_obj = await self.answer_service.get(answer_id, self.session)
+        if answer_obj.answer is None and answer is not None:
+            question_id = self.question.id if self.question is not None else None
+            new_answer = await self.answer_service.create_answer(
+                question_id=None,
+                next_question_id=answer_obj.next_question_id,
+                answer=answer,
+                session=self.session,
+            )
+            await self.survey_service.submit_answer(
+                new_answer.id, self._user_id, self.session, question_id=question_id
+            )
+        if answer_obj.answer is not None:
+            await self.survey_service.submit_answer(
+                answer_id, self._user_id, self.session
+            )
+        next_q_id = answer_obj.next_question_id
         if next_q_id is None:
             self.question = None
             return None
@@ -113,3 +130,8 @@ class SurveyEngine:
         await self.survey_service.delete_user_passes(
             survey_uuid, self._user_id, self.session
         )
+
+    async def update_survey(
+        self, survey_uuid: str, survey_data: json_schemas.SurveyJSON
+    ) -> None:
+        await self.survey_service.update_survey(survey_uuid, survey_data, self.session)

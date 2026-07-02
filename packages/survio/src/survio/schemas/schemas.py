@@ -51,7 +51,7 @@ class UserPass(User):
 
 
 class AnswerExt(Answer):
-    question_id: int
+    question_id: int | None
     question: Question
 
 

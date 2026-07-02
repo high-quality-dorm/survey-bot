@@ -26,7 +26,7 @@ class Passes(Base):
 class Answers(Base):
     __tablename__ = "answers"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    question_id: Mapped[int] = mapped_column(ForeignKey("questions.id"))
+    question_id: Mapped[int | None] = mapped_column(ForeignKey("questions.id"))
     next_question_id: Mapped[int | None] = mapped_column(ForeignKey("questions.id"))
     answer: Mapped[str | None] = mapped_column()
 
