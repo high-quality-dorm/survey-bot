@@ -43,3 +43,12 @@ class PassRepository(BaseRepository["Passes"]):
 
         result = await session.execute(query)
         return result.unique().scalars().all()
+
+    async def delete_user_passes(
+        self, survey_id: int, user_id: int, session: AsyncSession
+    ) -> None:
+
+        passes = await self.get_user_passes(survey_id, user_id, session)
+
+        for p in passes:
+            await session.delete(p)
