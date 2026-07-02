@@ -84,7 +84,7 @@ def sample_survey_json():
             {
                 "name": "q2",
                 "question": "Second question?",
-                "answers": [{"answer": "Ok", "next_question": None}]
+                "answers": [{"answer": None, "next_question": None}]
             }
         ]
     }

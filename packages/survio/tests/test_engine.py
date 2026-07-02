@@ -170,6 +170,84 @@ async def test_engine_submit_answer_without_init(survey_engine, session, sample_
     assert survey_engine.user is not None
 
 @pytest.mark.asyncio
+async def test_engine_submit_answer_with_custom_answer_for_nullable_answer(survey_engine, session):
+    sample = {
+        "title": "Custom answer test",
+        "description": "Desc",
+        "questions": [
+            {
+                "name": "q1",
+                "question": "First question?",
+                "answers": [{"answer": None, "next_question": "q2"}],
+            },
+            {
+                "name": "q2",
+                "question": "Second question?",
+                "answers": [{"answer": "Done", "next_question": None}],
+            },
+        ],
+    }
+
+    survey_service = SurveyService()
+    survey_data = json_schemas.SurveyJSON(**sample)
+    survey_uuid = await survey_service.create_survey_from_json(survey_data, session)
+
+    await survey_engine.init()
+    first_q = await survey_engine.start_survey(survey_uuid)
+
+    answer_repo = AnswerRepository(Answers)
+    answers = await answer_repo.get_all(session)
+    nullable_answer = next(a for a in answers if a.question_id == first_q.id and a.answer is None)
+
+    next_q = await survey_engine.submit_answer(nullable_answer.id, answer="Custom text")
+
+    assert next_q is not None
+    assert next_q.question == "Second question?"
+    assert survey_engine.question.id == next_q.id
+
+    survey_repo = SurveyRepository(Surveys)
+    survey = await survey_repo.get_by_uuid(survey_uuid, session)
+    passes = await survey_engine.get_user_passes(survey.id)
+    assert len(passes) == 1
+    assert passes[0].answer.answer == "Custom text"
+
+@pytest.mark.asyncio
+async def test_engine_submit_answer_with_custom_answer_finishes_survey(survey_engine, session):
+    sample = {
+        "title": "Custom finish test",
+        "description": "Desc",
+        "questions": [
+            {
+                "name": "q1",
+                "question": "First question?",
+                "answers": [{"answer": None, "next_question": None}],
+            }
+        ],
+    }
+
+    survey_service = SurveyService()
+    survey_data = json_schemas.SurveyJSON(**sample)
+    survey_uuid = await survey_service.create_survey_from_json(survey_data, session)
+
+    await survey_engine.init()
+    first_q = await survey_engine.start_survey(survey_uuid)
+
+    answer_repo = AnswerRepository(Answers)
+    answers = await answer_repo.get_all(session)
+    nullable_answer = next(a for a in answers if a.question_id == first_q.id and a.answer is None)
+
+    next_q = await survey_engine.submit_answer(nullable_answer.id, answer="Custom text")
+
+    assert next_q is None
+    assert survey_engine.question is None
+
+    survey_repo = SurveyRepository(Surveys)
+    survey = await survey_repo.get_by_uuid(survey_uuid, session)
+    passes = await survey_engine.get_user_passes(survey.id)
+    assert len(passes) == 1
+    assert passes[0].answer.answer == "Custom text"
+
+@pytest.mark.asyncio
 async def test_engine_get_survey_result(survey_engine, session, sample_survey_json):
 
     survey_service = SurveyService()
@@ -187,8 +265,8 @@ async def test_engine_get_survey_result(survey_engine, session, sample_survey_js
 
     second_q = survey_engine.get_current_question()
     assert second_q is not None
-    ans_ok = next(a for a in answers if a.question_id == second_q.id and a.answer == "Ok")
-    await survey_engine.submit_answer(ans_ok.id)
+    ans_ok = next(a for a in answers if a.question_id == second_q.id and a.answer is None)
+    await survey_engine.submit_answer(ans_ok.id, answer="Ok")
 
     result = await survey_engine.get_survey_result(survey_uuid)
     assert isinstance(result, schemas.SurveyResult)
@@ -284,3 +362,20 @@ async def test_engine_delete_user_passes(survey_engine, session, sample_survey_j
 
     passes_after = await survey_engine.get_user_passes(survey.id)
     assert len(passes_after) == 0
+
+@pytest.mark.asyncio
+async def test_submit_answer_free_answer(survey_engine, session, sample_survey_json):
+
+    survey_service = SurveyService()
+    survey_data = json_schemas.SurveyJSON(**sample_survey_json)
+    survey_uuid = await survey_service.create_survey_from_json(survey_data, session)
+
+    await survey_engine.init()
+    first_q = await survey_engine.start_survey(survey_uuid)
+    answer_repo = AnswerRepository(Answers)
+    answers = await answer_repo.get_all(session)
+    ans_yes = next(a for a in answers if a.question_id == first_q.id and a.answer == "Yes")
+
+    next_q = await survey_engine.submit_answer(ans_yes.id, answer="free answer")
+    assert next_q is not None
+    assert next_q.question == "Second question?"
