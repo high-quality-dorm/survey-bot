@@ -6,6 +6,7 @@ from survio.db.models import Users, Surveys, Answers
 from survio.repositories.user_repository import UserRepository
 from survio.repositories.survey_repository import SurveyRepository
 from survio.repositories.answer_repository import AnswerRepository
+from survio.services.survey_service import SurveyService
 
 @pytest.mark.asyncio
 async def test_engine_init(survey_engine, session):
@@ -34,7 +35,6 @@ async def test_engine_init_existing_user(survey_engine, session):
 @pytest.mark.asyncio
 async def test_engine_get_survey(survey_engine, session, sample_survey_json):
     
-    from survio.services.survey_service import SurveyService
     survey_service = SurveyService()
     survey_data = json_schemas.SurveyJSON(**sample_survey_json)
     survey_uuid = await survey_service.create_survey_from_json(survey_data, session)
@@ -72,7 +72,6 @@ async def test_engine_load_survey_from_str(survey_engine, sample_survey_json):
 @pytest.mark.asyncio
 async def test_engine_start_survey(survey_engine, session, sample_survey_json):
 
-    from survio.services.survey_service import SurveyService
     survey_service = SurveyService()
     survey_data = json_schemas.SurveyJSON(**sample_survey_json)
     survey_uuid = await survey_service.create_survey_from_json(survey_data, session)
@@ -101,7 +100,6 @@ async def test_engine_get_current_question(survey_engine):
 @pytest.mark.asyncio
 async def test_engine_submit_answer(survey_engine, session, sample_survey_json):
     
-    from survio.services.survey_service import SurveyService
     survey_service = SurveyService()
     survey_data = json_schemas.SurveyJSON(**sample_survey_json)
     survey_uuid = await survey_service.create_survey_from_json(survey_data, session)
@@ -138,7 +136,6 @@ async def test_engine_submit_answer_finish(survey_engine, session):
             }
         ]
     }
-    from survio.services.survey_service import SurveyService
     survey_service = SurveyService()
     survey_data = json_schemas.SurveyJSON(**sample)
     survey_uuid = await survey_service.create_survey_from_json(survey_data, session)
@@ -157,7 +154,6 @@ async def test_engine_submit_answer_finish(survey_engine, session):
 @pytest.mark.asyncio
 async def test_engine_submit_answer_without_init(survey_engine, session, sample_survey_json):
 
-    from survio.services.survey_service import SurveyService
     survey_service = SurveyService()
     survey_data = json_schemas.SurveyJSON(**sample_survey_json)
     survey_uuid = await survey_service.create_survey_from_json(survey_data, session)
@@ -176,7 +172,6 @@ async def test_engine_submit_answer_without_init(survey_engine, session, sample_
 @pytest.mark.asyncio
 async def test_engine_get_survey_result(survey_engine, session, sample_survey_json):
 
-    from survio.services.survey_service import SurveyService
     survey_service = SurveyService()
     survey_data = json_schemas.SurveyJSON(**sample_survey_json)
     survey_uuid = await survey_service.create_survey_from_json(survey_data, session)
@@ -221,7 +216,7 @@ async def test_engine_get_all_results(survey_engine, session, sample_survey_json
             }
         ]
     }
-    from survio.services.survey_service import SurveyService
+
     survey_service = SurveyService()
     survey_data = json_schemas.SurveyJSON(**sample)
     survey_uuid = await survey_service.create_survey_from_json(survey_data, session)
@@ -247,7 +242,6 @@ async def test_engine_get_all_results(survey_engine, session, sample_survey_json
 @pytest.mark.asyncio
 async def test_engine_get_user_passes(survey_engine, session, sample_survey_json):
 
-    from survio.services.survey_service import SurveyService
     survey_service = SurveyService()
     survey_data = json_schemas.SurveyJSON(**sample_survey_json)
     survey_uuid = await survey_service.create_survey_from_json(survey_data, session)
@@ -266,3 +260,27 @@ async def test_engine_get_user_passes(survey_engine, session, sample_survey_json
     assert passes[0].user_id == 1
     assert passes[0].question_id == first_q.id
     assert passes[0].answer.answer == "Yes"
+
+@pytest.mark.asyncio
+async def test_engine_delete_user_passes(survey_engine, session, sample_survey_json):
+
+    survey_service = SurveyService()
+    survey_data = json_schemas.SurveyJSON(**sample_survey_json)
+    survey_uuid = await survey_service.create_survey_from_json(survey_data, session)
+
+    await survey_engine.init()
+    first_q = await survey_engine.start_survey(survey_uuid)
+    answer_repo = AnswerRepository(Answers)
+    answers = await answer_repo.get_all(session)
+    ans_yes = next(a for a in answers if a.question_id == first_q.id and a.answer == "Yes")
+    await survey_engine.submit_answer(ans_yes.id)
+
+    survey_repo = SurveyRepository(Surveys)
+    survey = await survey_repo.get_by_uuid(survey_uuid, session)
+    passes_before = await survey_engine.get_user_passes(survey.id)
+    assert len(passes_before) == 1
+
+    await survey_engine.delete_user_passes(survey_uuid)
+
+    passes_after = await survey_engine.get_user_passes(survey.id)
+    assert len(passes_after) == 0
