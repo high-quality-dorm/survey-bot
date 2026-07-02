@@ -6,8 +6,8 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram_i18n import I18nMiddleware
 from aiogram_i18n.cores import FluentCompileCore
-from survio.db.database import (
-    create_tables as survio_create_tables,  # type: ignore[import-untyped]
+from survio.db.database import (  # type: ignore[import-untyped]
+    create_tables as survio_create_tables,
 )
 
 from bot.core import settings

@@ -4,7 +4,6 @@ from aiogram.types import Message
 from aiogram_i18n import I18nContext
 
 from bot.keyboards import get_to_menu_kb
-from bot.models import User
 from bot.repositories import UserRepository
 
 router = Router()

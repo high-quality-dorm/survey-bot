@@ -24,7 +24,9 @@ async def handle_menu_create(
     message: Message, i18n: I18nContext, state: FSMContext
 ) -> None:
     await state.set_state(state=CreateSurvey.waiting_for_json)
-    await message.answer(i18n.get("survey-creation-waiting-json"), reply_markup=get_to_menu_kb())
+    await message.answer(
+        i18n.get("survey-creation-waiting-json"), reply_markup=get_to_menu_kb()
+    )
 
 
 @router.message(F.text, CreateSurvey.waiting_for_json)
@@ -35,9 +37,14 @@ async def process_survey_json(
     try:
         survey_id = await survey_engine.load_survey(survey=message.text)
         await state.clear()
-        await message.answer(text=i18n.get("survey-creation-success", survey_id=survey_id), reply_markup=get_to_menu_kb())
+        await message.answer(
+            text=i18n.get("survey-creation-success", survey_id=survey_id),
+            reply_markup=get_to_menu_kb(),
+        )
     except Exception:
-        await message.answer(text=i18n.get("survey-creation-error"), reply_markup=get_to_menu_kb())
+        await message.answer(
+            text=i18n.get("survey-creation-error"), reply_markup=get_to_menu_kb()
+        )
 
 
 @router.message(LazyFilter("btn-menu-start-survey"))
