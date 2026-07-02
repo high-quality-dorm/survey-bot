@@ -11,6 +11,9 @@ btn-menu-create = Создать опрос
 btn-menu-start-survey = Начать опрос
 btn-menu-statistics = Статистика
 
-menu-create = Меню создания опроса. Введите json строку в нужном формате
+survey-creation-waiting-json = Введите json строку в нужном формате
+survey-creation-success = Отлично! Опрос создан, вот его ID: { $survey_id }
+survey-creation-error = Ошибка! Не получилось создать опрос. Проверьте формат
+
 menu-start-survey = Меню начала
 menu-statistics = Меню статистик
