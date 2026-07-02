@@ -106,3 +106,10 @@ class SurveyEngine:
         return await self.pass_service.get_user_passes(
             survey_id, self._user_id, self.session
         )
+
+    async def delete_user_passes(self, survey_uuid: str) -> None:
+        if self.user is None:
+            await self.init()
+        await self.survey_service.delete_user_passes(
+            survey_uuid, self._user_id, self.session
+        )
