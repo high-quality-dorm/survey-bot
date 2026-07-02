@@ -32,9 +32,9 @@ async def process_survey_json(
     message: Message, i18n: I18nContext, survey_engine: SurveyEngine, state: FSMContext
 ) -> None:
     assert message.text is not None
-    await survey_engine.load_survey(survey=message.text)
+    survey_id = await survey_engine.load_survey(survey=message.text)
     await state.clear()
-    await message.answer(i18n.get("success"), reply_markup=get_to_menu_kb())
+    await message.answer(text=f"Survey created with ID: {survey_id}", reply_markup=get_to_menu_kb())
 
 
 @router.message(LazyFilter("btn-menu-start-survey"))

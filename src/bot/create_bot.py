@@ -6,9 +6,13 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram_i18n import I18nMiddleware
 from aiogram_i18n.cores import FluentCompileCore
+from survio.db.database import (
+    create_tables as survio_create_tables,  # type: ignore[import-untyped]
+)
 
 from bot.core import settings
 from bot.db import create_tables
+from bot.db.database import _engine
 from bot.handlers import main_router
 from bot.middlewares.common import DatabaseMiddleware
 
@@ -37,6 +41,7 @@ dp.include_router(main_router)
 async def run() -> None:
 
     await create_tables()
+    await survio_create_tables(_engine)
 
     try:
         logging.info("Bot is starting")
