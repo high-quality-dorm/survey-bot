@@ -180,3 +180,8 @@ class SurveyService:
         if question is None:
             return None
         return schemas.Question.model_validate(question)
+
+    async def delete_user_passes(self, survey_uuid: str, user_id: int, session: AsyncSession) -> None:
+        survey = await self.survey_repo.get_by_uuid(survey_uuid, session)
+        await self.pass_repo.delete_user_passes(survey.id, user_id, session)
+        await session.commit()
