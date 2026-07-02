@@ -3,6 +3,7 @@ from typing import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from survio import exceptions
 from survio.db.models import Answers, Passes, Questions, Surveys, Users
 from survio.repositories.answer_repository import AnswerRepository
 from survio.repositories.pass_repository import PassRepository
@@ -10,7 +11,7 @@ from survio.repositories.question_repository import QuestionRepository
 from survio.repositories.survey_repository import SurveyRepository
 from survio.repositories.user_repository import UserRepository
 from survio.schemas import json_schemas, schemas
-from survio import exceptions
+
 
 class SurveyService:
     def __init__(self):
@@ -90,15 +91,25 @@ class SurveyService:
         return survey.uuid
 
     async def submit_answer(
-        self, answer_id: int, user_id: int, session: AsyncSession
+        self,
+        answer_id: int,
+        user_id: int,
+        session: AsyncSession,
+        question_id: int | None = None,
     ) -> schemas.Pass:
         answer = await self.answer_repo.get_with_relationship(answer_id, session)
-
-        pass_obj = Passes(
-            user_id=user_id,
-            question_id=answer.question_id,
-            answer_id=answer.id,
-        )
+        if question_id is None:
+            pass_obj = Passes(
+                user_id=user_id,
+                question_id=answer.question_id,
+                answer_id=answer.id,
+            )
+        else:
+            pass_obj = Passes(
+                user_id=user_id,
+                question_id=question_id,
+                answer_id=answer.id,
+            )
         await self.pass_repo.create(pass_obj, session)
         await session.flush()
 
@@ -181,7 +192,20 @@ class SurveyService:
             return None
         return schemas.Question.model_validate(question)
 
-    async def delete_user_passes(self, survey_uuid: str, user_id: int, session: AsyncSession) -> None:
+    async def delete_user_passes(
+        self, survey_uuid: str, user_id: int, session: AsyncSession
+    ) -> None:
         survey = await self.survey_repo.get_by_uuid(survey_uuid, session)
         await self.pass_repo.delete_user_passes(survey.id, user_id, session)
+        await session.commit()
+
+    async def update_survey(
+        self,
+        survey_uuid: str,
+        survey_data: json_schemas.SurveyJSON,
+        session: AsyncSession,
+    ) -> None:
+        survey = await self.survey_repo.get_by_uuid(survey_uuid, session)
+        survey.title = survey_data.title
+        survey.description = survey_data.description
         await session.commit()
