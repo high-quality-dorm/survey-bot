@@ -13,7 +13,9 @@ btn-menu-statistics = Статистика
 
 
 survey-creation-waiting-json = Введите json строку в нужном формате
-survey-creation-success = Отлично! Опрос создан, вот его ID: { $survey_id }
+survey-creation-success = 
+    Отлично! Опрос создан, вот его UUID:
+    { $survey_id }
 survey-creation-error = Ошибка! Не получилось создать опрос. Проверьте формат
 
 
