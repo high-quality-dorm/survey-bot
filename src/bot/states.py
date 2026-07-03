@@ -6,5 +6,5 @@ class CreateSurvey(StatesGroup):
 
 
 class StartSurvey(StatesGroup):
-    waiting_for_survey_id = State()
+    waiting_for_survey_uuid = State()
     answering_question = State()

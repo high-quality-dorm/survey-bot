@@ -17,9 +17,9 @@ router = Router()
 async def handle_menu_start_survey(
     message: Message, i18n: I18nContext, state: FSMContext
 ) -> None:
-    await state.set_state(state=StartSurvey.waiting_for_survey_id)
+    await state.set_state(state=StartSurvey.waiting_for_survey_uuid)
     await message.answer(
-        i18n.get("survey-start-waiting-id"), reply_markup=get_to_menu_kb()
+        i18n.get("survey-start-waiting-uuid"), reply_markup=get_to_menu_kb()
     )
 
 
@@ -34,7 +34,7 @@ async def prepare_question(
     return (text, get_survey_answer_kb(nums=list(range(1, len(answers) + 1))))
 
 
-@router.message(F.text, StartSurvey.waiting_for_survey_id)
+@router.message(F.text, StartSurvey.waiting_for_survey_uuid)
 async def handle_start_survey_id(
     message: Message, i18n: I18nContext, survey_engine: SurveyEngine, state: FSMContext
 ) -> None:
