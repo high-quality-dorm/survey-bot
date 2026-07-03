@@ -17,11 +17,12 @@ survey-creation-success = Отлично! Опрос создан, вот его
 survey-creation-error = Ошибка! Не получилось создать опрос. Проверьте формат
 
 
-survey-start-waiting-uuid = Введите id опроса
-survey-start-error = Ошибка! Введите корректный id опроса
+survey-start-waiting-uuid = Введите uuid опроса
+survey-start-error = Ошибка! Введите корректный uuid опроса
 
 survey-answer-error = Ошибка! Выберите корректный вопрос
 survey-end = Опрос пройден!
 
 
-menu-statistics = Меню статистик
+survey-statistics-waiting-uuid = Введите uuid опроса для просмотра статистики
+survey-statistics-error = Ошибка! Введите корректный uuid опроса

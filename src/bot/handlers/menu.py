@@ -16,8 +16,3 @@ async def handle_menu(message: Message, i18n: I18nContext, state: FSMContext) ->
     assert message.from_user is not None
     await message.answer(i18n.get("menu"), reply_markup=get_main_menu_kb())
     await state.clear()
-
-
-@router.message(LazyFilter("btn-menu-statistics"), StateFilter(None))
-async def handle_menu_statistics(message: Message, i18n: I18nContext) -> None:
-    await message.answer(i18n.get("menu-statistics"), reply_markup=get_to_menu_kb())

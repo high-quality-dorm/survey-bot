@@ -8,3 +8,7 @@ class CreateSurvey(StatesGroup):
 class StartSurvey(StatesGroup):
     waiting_for_survey_uuid = State()
     answering_question = State()
+
+
+class ShowStatistics(StatesGroup):
+    waiting_for_survey_uuid = State()
