@@ -30,10 +30,18 @@ async def handle_statistics_survey_uuid(
     survey_uuid = message.text
 
     try:
-        survey = await survey_engine.get_survey(survey_uuid=survey_uuid)
         stats = await survey_engine.get_statistics(survey_uuid=survey_uuid)
-        
-        text = f"{i18n.get("survey-representation", title=survey.title, description=survey.description)}\n\n"
+
+        survey = await survey_engine.get_survey(survey_uuid=survey_uuid)
+        await message.answer(
+            text=i18n.get(
+                "survey-representation",
+                title=survey.title,
+                description=survey.description,
+            )
+        )
+
+        text = ""
         for question, answers in stats.items():
             text += f"{question}\n"
             for answer, count in answers.items():
@@ -41,7 +49,7 @@ async def handle_statistics_survey_uuid(
 
         await state.clear()
         await message.answer(
-            text=f"Статистика:\n{text}",
+            text=i18n.get("survey-statistics", stats=text),
             reply_markup=get_to_menu_kb(),
         )
     except Exception:

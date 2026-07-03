@@ -18,16 +18,20 @@ survey-creation-success =
     { $survey_id }
 survey-creation-error = Ошибка! Не получилось создать опрос. Проверьте формат
 
+
 survey-representation = 
     Название: { $title }
     Описание: { $description }
 
+
 survey-start-waiting-uuid = Введите uuid опроса
 survey-start-error = Ошибка! Введите корректный uuid опроса
-
 survey-answer-error = Ошибка! Выберите корректный вопрос
 survey-end = Опрос пройден!
 
 
 survey-statistics-waiting-uuid = Введите uuid опроса для просмотра статистики
 survey-statistics-error = Ошибка! Введите корректный uuid опроса
+survey-statistics = 
+    Статистика:
+    { $stats }
