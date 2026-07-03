@@ -1,7 +1,7 @@
 from aiogram import F, Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, ReplyKeyboardMarkup
+from aiogram.types import Message, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from aiogram_i18n import I18nContext, LazyFilter
 from survio.main import SurveyEngine  # type: ignore[import-untyped]
 from survio.schemas.schemas import Question  # type: ignore[import-untyped]
@@ -25,7 +25,14 @@ async def handle_menu_start_survey(
 
 async def prepare_question(
     question: Question, state: FSMContext
-) -> tuple[str, ReplyKeyboardMarkup]:
+) -> tuple[str, ReplyKeyboardMarkup | ReplyKeyboardRemove]:
+
+    first_answer = question.answers[0]
+    if not first_answer.answer:
+        await state.set_data(data={"free": first_answer.id})
+        print(first_answer.id)
+        return (f"{question.question}\nСвободный ответ", ReplyKeyboardRemove())
+
     answers = {f"{i + 1}": answer.id for i, answer in enumerate(question.answers)}
     await state.set_data(data=answers)
     text: str = f"{question.question}\n" + "\n".join(
@@ -70,20 +77,22 @@ async def handle_survey_answer(
     assert message.text is not None
 
     data = await state.get_data()
-    answer_id = None
 
-    print(data)
-    answer_id = data.get(message.text, None)
-
-    if not answer_id:
-        await message.answer(
-            text=i18n.get("survey-answer-error"), reply_markup=get_to_menu_kb()
+    free_answer_id = data.get("free", None)
+    if free_answer_id:
+        print(free_answer_id)
+        question: Question | None = await survey_engine.submit_answer(
+            answer_id=free_answer_id, answer=message.text
         )
-        return
+    else:
+        answer_id = data.get(message.text, None)
+        if not answer_id:
+            await message.answer(
+                text=i18n.get("survey-answer-error"), reply_markup=get_to_menu_kb()
+            )
+            return
+        question = await survey_engine.submit_answer(answer_id=answer_id)
 
-    await survey_engine.submit_answer(answer_id=answer_id)
-
-    question: Question | None = survey_engine.get_current_question()
     if question is None:
         await state.clear()
         await message.answer(text=i18n.get("survey-end"), reply_markup=get_to_menu_kb())
