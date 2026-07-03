@@ -1,12 +1,11 @@
-from sqlalchemy import ForeignKey
+from sqlalchemy import BigInteger, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from survio.db.database import Base
 
 
 class Users(Base):
     __tablename__ = "users"
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
 
     passes: Mapped[list["Passes"]] = relationship(back_populates="user")
 
