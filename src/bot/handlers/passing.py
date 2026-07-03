@@ -44,9 +44,19 @@ async def handle_start_survey_id(
         question: Question = await survey_engine.start_survey(survey_uuid=survey_uuid)
         await survey_engine.delete_user_passes(survey_uuid=survey_uuid)
 
+        survey = await survey_engine.get_survey(survey_uuid)
+        await message.answer(
+            i18n.get(
+                "survey-representation",
+                title=survey.title,
+                description=survey.description,
+            )
+        )
+
         await state.set_state(state=StartSurvey.answering_question)
         text, reply_markup = await prepare_question(question=question, state=state)
         await message.answer(text=text, reply_markup=reply_markup)
+
     except Exception:
         await message.answer(
             text=i18n.get("survey-start-error"), reply_markup=get_to_menu_kb()

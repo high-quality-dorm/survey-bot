@@ -30,9 +30,10 @@ async def handle_statistics_survey_uuid(
     survey_uuid = message.text
 
     try:
+        survey = await survey_engine.get_survey(survey_uuid=survey_uuid)
         stats = await survey_engine.get_statistics(survey_uuid=survey_uuid)
         
-        text = ""
+        text = f"{i18n.get("survey-representation", title=survey.title, description=survey.description)}\n\n"
         for question, answers in stats.items():
             text += f"{question}\n"
             for answer, count in answers.items():
