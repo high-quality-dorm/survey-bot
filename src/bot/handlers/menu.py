@@ -32,7 +32,7 @@ async def handle_menu_create(
 
 
 @router.message(F.text, CreateSurvey.waiting_for_json)
-async def process_survey_json(
+async def handle_survey_json(
     message: Message, i18n: I18nContext, survey_engine: SurveyEngine, state: FSMContext
 ) -> None:
     assert message.text is not None
@@ -49,17 +49,6 @@ async def process_survey_json(
         )
 
 
-async def prepare_question(
-    question: Question, i18n: I18nContext, state: FSMContext
-) -> tuple[str, ReplyKeyboardMarkup]:
-    answers = {f"{i + 1}": answer.id for i, answer in enumerate(question.answers)}
-    await state.set_data(data=answers)
-    text: str = f"{question.question}\n" + "\n".join(
-        [f"{i + 1}. {answer.answer}" for i, answer in enumerate(question.answers)]
-    )
-    return (text, get_survey_answer_kb(nums=list(range(1, len(answers) + 1))))
-
-
 @router.message(LazyFilter("btn-menu-start-survey"))
 async def handle_menu_start_survey(
     message: Message, i18n: I18nContext, state: FSMContext
@@ -70,18 +59,29 @@ async def handle_menu_start_survey(
     )
 
 
+async def prepare_question(
+    question: Question, state: FSMContext
+) -> tuple[str, ReplyKeyboardMarkup]:
+    answers = {f"{i + 1}": answer.id for i, answer in enumerate(question.answers)}
+    await state.set_data(data=answers)
+    text: str = f"{question.question}\n" + "\n".join(
+        [f"{i + 1}. {answer.answer}" for i, answer in enumerate(question.answers)]
+    )
+    return (text, get_survey_answer_kb(nums=list(range(1, len(answers) + 1))))
+
+
 @router.message(F.text, StartSurvey.waiting_for_survey_id)
-async def process_survey_id(
+async def handle_start_survey_id(
     message: Message, i18n: I18nContext, survey_engine: SurveyEngine, state: FSMContext
 ) -> None:
     assert message.text is not None
+    survey_uuid = message.text
     try:
-        question: Question = await survey_engine.start_survey(survey_uuid=message.text)
+        question: Question = await survey_engine.start_survey(survey_uuid=survey_uuid)
+        await survey_engine.delete_user_passes(survey_uuid=survey_uuid)
 
         await state.set_state(state=StartSurvey.answering_question)
-        text, reply_markup = await prepare_question(
-            question=question, i18n=i18n, state=state
-        )
+        text, reply_markup = await prepare_question(question=question, state=state)
         await message.answer(text=text, reply_markup=reply_markup)
     except Exception:
         await message.answer(
@@ -90,7 +90,7 @@ async def process_survey_id(
 
 
 @router.message(F.text, StartSurvey.answering_question)
-async def process_survey_answer(
+async def handle_survey_answer(
     message: Message, i18n: I18nContext, survey_engine: SurveyEngine, state: FSMContext
 ) -> None:
     assert message.text is not None
@@ -115,9 +115,7 @@ async def process_survey_answer(
         await message.answer(text=i18n.get("survey-end"), reply_markup=get_to_menu_kb())
         return
 
-    text, reply_markup = await prepare_question(
-        question=question, i18n=i18n, state=state
-    )
+    text, reply_markup = await prepare_question(question=question, state=state)
     await message.answer(text=text, reply_markup=reply_markup)
 
 
