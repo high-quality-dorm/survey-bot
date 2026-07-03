@@ -71,7 +71,7 @@ class SurveyEngine:
             await self.init()
         answer_obj = await self.answer_service.get(answer_id, self.session)
         if answer_obj.answer is None and answer is not None:
-            question_id = self.question.id if self.question is not None else None
+            question_id = answer_obj.question_id
             new_answer = await self.answer_service.create_answer(
                 question_id=None,
                 next_question_id=answer_obj.next_question_id,

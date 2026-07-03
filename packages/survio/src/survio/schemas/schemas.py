@@ -16,6 +16,8 @@ class Answer(BaseModel):
     answer: str | None
     next_question_id: int | None
 
+    question_id: int | None
+    
     model_config = {"from_attributes": True}
 
 

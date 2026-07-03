@@ -28,5 +28,5 @@ class AnswerService:
             answer=answer,
         )
         await self.repo.create(answer_obj, session)
-        await session.flush()
+        await session.commit()
         return schemas.Answer.model_validate(answer_obj)
