@@ -5,7 +5,6 @@ btn-to-menu = Меню
 
 menu =
     Главное меню
-    Базовое меню
 
 btn-menu-create = Создать опрос
 btn-menu-start-survey = Начать опрос
