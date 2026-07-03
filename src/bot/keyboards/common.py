@@ -21,3 +21,10 @@ def get_main_menu_kb() -> ReplyKeyboardMarkup:
         ],
         resize_keyboard=True,
     )
+
+
+def get_survey_answer_kb(nums: list[str | int]) -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text=str(num))] for num in nums],
+        resize_keyboard=True,
+    )
