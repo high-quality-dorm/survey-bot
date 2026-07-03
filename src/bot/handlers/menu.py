@@ -1,5 +1,6 @@
 from aiogram import F, Router
-from aiogram.filters import Command
+from aiogram.filters import Command, StateFilter
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram_i18n import I18nContext, LazyFilter
 
@@ -11,11 +12,12 @@ router = Router()
 @router.message(LazyFilter("btn-to-menu"))
 @router.message(F.text.lower() == "меню")
 @router.message(Command("menu"))
-async def handle_menu(message: Message, i18n: I18nContext) -> None:
+async def handle_menu(message: Message, i18n: I18nContext, state: FSMContext) -> None:
     assert message.from_user is not None
     await message.answer(i18n.get("menu"), reply_markup=get_main_menu_kb())
+    await state.clear()
 
 
-@router.message(LazyFilter("btn-menu-statistics"))
+@router.message(LazyFilter("btn-menu-statistics"), StateFilter(None))
 async def handle_menu_statistics(message: Message, i18n: I18nContext) -> None:
     await message.answer(i18n.get("menu-statistics"), reply_markup=get_to_menu_kb())

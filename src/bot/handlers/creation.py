@@ -1,4 +1,5 @@
 from aiogram import F, Router
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram_i18n import I18nContext, LazyFilter
@@ -10,7 +11,7 @@ from bot.states import CreateSurvey
 router = Router()
 
 
-@router.message(LazyFilter("btn-menu-create"))
+@router.message(LazyFilter("btn-menu-create"), StateFilter(None))
 async def handle_menu_create(
     message: Message, i18n: I18nContext, state: FSMContext
 ) -> None:

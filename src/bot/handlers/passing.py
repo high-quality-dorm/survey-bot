@@ -1,4 +1,5 @@
 from aiogram import F, Router
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardMarkup
 from aiogram_i18n import I18nContext, LazyFilter
@@ -12,7 +13,7 @@ from bot.states import StartSurvey
 router = Router()
 
 
-@router.message(LazyFilter("btn-menu-start-survey"))
+@router.message(LazyFilter("btn-menu-start-survey"), StateFilter(None))
 async def handle_menu_start_survey(
     message: Message, i18n: I18nContext, state: FSMContext
 ) -> None:
