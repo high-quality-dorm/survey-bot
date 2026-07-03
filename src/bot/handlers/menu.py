@@ -1,10 +1,10 @@
 from aiogram import F, Router
-from aiogram.filters import Command, StateFilter
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram_i18n import I18nContext, LazyFilter
 
-from bot.keyboards import get_main_menu_kb, get_to_menu_kb
+from bot.keyboards import get_main_menu_kb
 
 router = Router()
 
