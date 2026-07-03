@@ -117,6 +117,25 @@ class SurveyEngine:
             survey_uuid, self.session
         )
 
+    async def get_statistics(self, survey_uuid: str) -> dict[str, dict[str, int]]:
+        results = await self.get_all_results(survey_uuid)
+        stats: dict[str, dict] = {}
+
+        questions = []  # get questions from service, not results
+
+        for result in results:
+            answers = result.answers
+            for answer in answers:
+                questions.append(answer.question)
+                stats[answer.question.question] = stats.get(
+                    answer.question.question, {}
+                )
+                assert answer.answer is not None
+                stats[answer.question.question][answer.answer] = (
+                    stats[answer.question.question].get(answer.answer, 0) + 1
+                )
+        return stats
+
     async def get_user_passes(self, survey_id: int) -> list[schemas.Pass]:
         if self.user is None:
             await self.init()
